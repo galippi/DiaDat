@@ -60,9 +60,13 @@ int8_t DiaDat_File::create(const char *filename)
 
 int32_t DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelType type)
 {
+    auto it = channelNumber.find(name);
+    if (it != channelNumber.end())
+        throw "Duplicated channel name!";
     auto fileChannel = getDataFile(type);
     DiaDat_FileChannel *ch = new DiaDat_FileChannel(name, type, fileChannel);
     channels.push_back(ch);
+    channelNumber[name] = channels.size() - 1;
     return 0;
 }
 
