@@ -1,5 +1,7 @@
 #include "diadat_file.h"
 
+#include "my_debug.h"
+
 DiaDat_DataFile::DiaDat_DataFile(const char *filenameBase, t_DiaDat_ChannelType type)
 {
     file = NULL;
@@ -15,7 +17,7 @@ DiaDat_DataFile::DiaDat_DataFile(const char *filenameBase, t_DiaDat_ChannelType 
             break;
         }
         default:
-            throw "DiaDat_DataFile - Not implemented channel type!";
+            throw dbg_spintf("DiaDat_DataFile - Not implemented channel type %d!", type);
             break;
     }
 }
@@ -58,16 +60,19 @@ int8_t DiaDat_File::create(const char *filename)
     return 0;
 }
 
-int32_t DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelType type)
+int32_t DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelType chType)
 {
+    if (type != e_DiaDatFileType_Write)
+        throw dbg_spintf("DiaDat_File::createChannel - channel cannot be created for this type of file (%d - %s)!", type, name);
     auto it = channelNumber.find(name);
     if (it != channelNumber.end())
-        throw "Duplicated channel name!";
-    auto fileChannel = getDataFile(type);
-    DiaDat_FileChannel *ch = new DiaDat_FileChannel(name, type, fileChannel);
+        throw dbg_spintf("Duplicated channel name %s!", name);
+    auto fileChannel = getDataFile(chType);
+    DiaDat_FileChannel *ch = new DiaDat_FileChannel(name, chType, fileChannel);
+    int32_t chIdx = channels.size();
     channels.push_back(ch);
-    channelNumber[name] = channels.size() - 1;
-    return 0;
+    channelNumber[name] = chIdx;
+    return chIdx;
 }
 
 DiaDat_FileChannel *DiaDat_File::getChannel(int32_t chIdx)
