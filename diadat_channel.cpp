@@ -1,6 +1,8 @@
-
 #include "diadat_channel.h"
 
+#include "diadat_channel_s8.h"
+
+#include "my_debug.h"
 
 DiaDat_ChannelDataBase::DiaDat_ChannelDataBase()
 {
@@ -74,9 +76,14 @@ DiaDat_Channel::DiaDat_Channel(const char *name, t_DiaDat_ChannelType type)
         dataHandler = new DiaDat_ChannelDataU8();
         break;
     }
+    case e_DiaDat_ChannelType_s8:
+    {
+        dataHandler = new DiaDat_ChannelDataS8();
+        break;
+    }
     default:
         dataHandler = NULL;
-        throw "DiaDat_Channel - not implemented channel type!";
+        throw dbg_spintf("DiaDat_Channel - not implemented channel type %d!", type);
         break;
     }
 }

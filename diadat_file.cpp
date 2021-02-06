@@ -16,6 +16,11 @@ DiaDat_DataFile::DiaDat_DataFile(const char *filenameBase, t_DiaDat_ChannelType 
             filename = filename + ".u8";
             break;
         }
+        case e_DiaDat_ChannelType_s8:
+        {
+            filename = filename + ".s8";
+            break;
+        }
         default:
             throw dbg_spintf("DiaDat_DataFile - Not implemented channel type %d!", type);
             break;
