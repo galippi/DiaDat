@@ -45,22 +45,32 @@ DiaDat_FileChannel::DiaDat_FileChannel(const char *name, t_DiaDat_ChannelType ty
 DiaDat_File::DiaDat_File()
 {
     type = e_DiaDatFileType_None;
+    datHeaderIsNotYetWritten = false;
+    file = NULL;
 }
 
 DiaDat_File::~DiaDat_File()
 {
+    if (type == e_DiaDatFileType_None)
+        throw dbg_spintf("DiaDat_File::dtor - file is not yet open/created (%s)!", name.c_str());
+    if (file != NULL)
+        fclose(file);
 }
 
 int8_t DiaDat_File::open(const char *filename)
 {
-    (void)filename;
+    if (type != e_DiaDatFileType_None)
+        throw dbg_spintf("DiaDat_File::open - file is already open/created (%s - %s)!", name.c_str(), filename);
+    name = filename;
     type = e_DiaDatFileType_Read;
     return 0;
 }
 
 int8_t DiaDat_File::create(const char *filename)
 {
-    (void)filename;
+    if (type != e_DiaDatFileType_None)
+        throw dbg_spintf("DiaDat_File::open - file is already open/created (%s - %s)!", name.c_str(), filename);
+    name = filename;
     type = e_DiaDatFileType_Write;
     return 0;
 }

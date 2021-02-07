@@ -71,6 +71,8 @@ class DiaDat_File
     std::vector<DiaDat_FileChannel*> channels;
     std::map<t_DiaDat_ChannelType, DiaDat_DataFile*> dataFiles;
     std::map<const char *, int32_t> channelNumber;
+    bool datHeaderIsNotYetWritten;
+    FILE *file;
 };
 
 #endif /* _DIADAT_FILE_H_ */
