@@ -27,6 +27,11 @@ class DiaDat_ChannelDataBase
         return dataPtr;
     }
     virtual int8_t set(double data) = 0;
+    virtual void set(double *data)
+    {
+        conversionIsRequired = true;
+        dataPtr = data;
+    }
     uint8_t getDataSize() const
     {
         return dataSize;
@@ -34,6 +39,7 @@ class DiaDat_ChannelDataBase
   private:
     uint8_t dataSize;
     void *dataPtr;
+    bool conversionIsRequired;
 };
 
 class DiaDat_Channel
