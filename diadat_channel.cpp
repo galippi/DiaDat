@@ -5,10 +5,16 @@
 
 #include "my_debug.h"
 
-DiaDat_ChannelDataBase::DiaDat_ChannelDataBase()
+uint8_t c_DiaDat_ChannelTypeBase::idSource = 0;
+c_DiaDat_ChannelTypeBase DiaDat_ChannelType_u8("DiaDat_ChannelType_u8", "u8");
+c_DiaDat_ChannelTypeBase DiaDat_ChannelType_s8("DiaDat_ChannelType_s8", "s8");
+c_DiaDat_ChannelTypeBase DiaDat_ChannelType_u16("DiaDat_ChannelType_u16", "u16");
+c_DiaDat_ChannelTypeBase DiaDat_ChannelType_s16("DiaDat_ChannelType_s16", "s16");
+
+DiaDat_ChannelDataBase::DiaDat_ChannelDataBase(void *var)
 {
     dataSize=0;
-    dataPtr = NULL;
+    dataPtr = var;
     conversionIsRequired = false;
 }
 
@@ -16,30 +22,32 @@ DiaDat_ChannelDataBase::~DiaDat_ChannelDataBase()
 {
 }
 
-DiaDat_Channel::DiaDat_Channel()
+DiaDat_Channel::DiaDat_Channel(void *var)
 {
     name = "";
     dataHandler = NULL;
+    if (var != NULL)
+        throw dbg_spintf("DiaDat_Channel - not valid parameter (var != NULL)!");
 }
 
-DiaDat_Channel::DiaDat_Channel(const char *name, t_DiaDat_ChannelType type)
+DiaDat_Channel::DiaDat_Channel(const char *name, t_DiaDat_ChannelType type, void *var)
 {
     this->name = name;
     switch(type)
     {
-    case e_DiaDat_ChannelType_u8:
-    {
-        dataHandler = new DiaDat_ChannelDataU8();
-        break;
-    }
-    case e_DiaDat_ChannelType_s8:
-    {
-        dataHandler = new DiaDat_ChannelDataS8();
-        break;
-    }
-    default:
-        dataHandler = NULL;
-        throw dbg_spintf("DiaDat_Channel - not implemented channel type %d!", type);
-        break;
+        case e_DiaDat_ChannelType_u8:
+        {
+            dataHandler = new DiaDat_ChannelDataU8(var);
+            break;
+        }
+        case e_DiaDat_ChannelType_s8:
+        {
+            dataHandler = new DiaDat_ChannelDataS8(var);
+            break;
+        }
+        default:
+            dataHandler = NULL;
+            throw dbg_spintf("DiaDat_Channel - not implemented channel type %d!", type);
+            break;
     }
 }

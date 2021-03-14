@@ -13,10 +13,44 @@ typedef enum
   e_DiaDat_ChannelType_s16,
 }t_DiaDat_ChannelType;
 
+class c_DiaDat_ChannelTypeBase
+{
+public:
+    c_DiaDat_ChannelTypeBase(const char *name, const char *datFileSuffix)
+    {
+        id = idSource;
+        idSource++;
+        this->name = name;
+        this->datFileSuffix = datFileSuffix;
+    }
+    uint8_t getId() const
+    {
+        return id;
+    }
+    const char *getName() const
+    {
+        return name;
+    }
+    const char *getDatFileSuffix() const
+    {
+        return datFileSuffix;
+    }
+protected:
+    static uint8_t idSource;
+    uint8_t id;
+    const char *name;
+    const char *datFileSuffix;
+};
+
+extern c_DiaDat_ChannelTypeBase DiaDat_ChannelType_u8;
+extern c_DiaDat_ChannelTypeBase DiaDat_ChannelType_s8;
+extern c_DiaDat_ChannelTypeBase DiaDat_ChannelType_u16;
+extern c_DiaDat_ChannelTypeBase DiaDat_ChannelType_s16;
+
 class DiaDat_ChannelDataBase
 {
   public:
-    DiaDat_ChannelDataBase();
+    DiaDat_ChannelDataBase(void *var = NULL);
     virtual ~DiaDat_ChannelDataBase();
     virtual t_DiaDat_ChannelType getType() const = 0;
     virtual double getMin() const = 0;
@@ -45,8 +79,8 @@ class DiaDat_ChannelDataBase
 class DiaDat_Channel
 {
   public:
-    DiaDat_Channel();
-    DiaDat_Channel(const char *name, t_DiaDat_ChannelType type);
+    DiaDat_Channel(void *var = NULL);
+    DiaDat_Channel(const char *name, t_DiaDat_ChannelType type, void *var = NULL);
     ~DiaDat_Channel(){};
     DiaDat_ChannelDataBase *getDataHandler() const
     {
@@ -55,6 +89,14 @@ class DiaDat_Channel
     void setBlockOffset(uint32_t _offset)
     {
         offset = _offset;
+    }
+    const std::string getName() const
+    {
+        return name;
+    }
+    const std::string getUnit() const
+    {
+        return unit;
     }
   protected:
     std::string name;

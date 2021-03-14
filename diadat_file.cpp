@@ -1,3 +1,6 @@
+#include <time.h>
+#include <stdarg.h>
+
 #include "diadat_file.h"
 
 #include "my_debug.h"
@@ -14,11 +17,13 @@ DiaDat_DataFile::DiaDat_DataFile(const char *filenameBase, t_DiaDat_ChannelType 
         case e_DiaDat_ChannelType_u8:
         {
             filename = filename + ".u8";
+            datFileType = "WORD8";
             break;
         }
         case e_DiaDat_ChannelType_s8:
         {
             filename = filename + ".s8";
+            datFileType = "WORD8";
             break;
         }
         default:
@@ -35,8 +40,8 @@ void DiaDat_DataFile::addChannel(DiaDat_Channel *channel)
     channels.push_back(channel);
 }
 
-DiaDat_FileChannel::DiaDat_FileChannel(const char *name, t_DiaDat_ChannelType type, DiaDat_DataFile *file)
-    : DiaDat_Channel(name, type)
+DiaDat_FileChannel::DiaDat_FileChannel(const char *name, t_DiaDat_ChannelType type, DiaDat_DataFile *file, void *var)
+    : DiaDat_Channel(name, type, var)
 {
     this->file = file;
     file->addChannel(this);
@@ -45,8 +50,10 @@ DiaDat_FileChannel::DiaDat_FileChannel(const char *name, t_DiaDat_ChannelType ty
 DiaDat_File::DiaDat_File()
 {
     type = e_DiaDatFileType_None;
-    datHeaderIsNotYetWritten = false;
     file = NULL;
+    dT = -1;
+    t = 0;
+    recordCount = 0;
 }
 
 DiaDat_File::~DiaDat_File()
@@ -63,19 +70,23 @@ int8_t DiaDat_File::open(const char *filename)
         throw dbg_spintf("DiaDat_File::open - file is already open/created (%s - %s)!", name.c_str(), filename);
     name = filename;
     type = e_DiaDatFileType_Read;
+    readHeader();
     return 0;
 }
 
 int8_t DiaDat_File::create(const char *filename)
 {
     if (type != e_DiaDatFileType_None)
-        throw dbg_spintf("DiaDat_File::open - file is already open/created (%s - %s)!", name.c_str(), filename);
+        throw dbg_spintf("DiaDat_File::create - file is already open/created (%s - %s)!", name.c_str(), filename);
     name = filename;
+    file = fopen(filename, "wt");
+    if (file == NULL)
+        throw dbg_spintf("DiaDat_File::create - unable to create file (%s)!", name.c_str());
     type = e_DiaDatFileType_Write;
     return 0;
 }
 
-int32_t DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelType chType)
+int32_t DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelType chType, void *var)
 {
     if (type != e_DiaDatFileType_Write)
         throw dbg_spintf("DiaDat_File::createChannel - channel cannot be created for this type of file (%d - %s)!", type, name);
@@ -83,7 +94,7 @@ int32_t DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelType chType
     if (it != channelNumber.end())
         throw dbg_spintf("Duplicated channel name %s!", name);
     auto fileChannel = getDataFile(chType);
-    DiaDat_FileChannel *ch = new DiaDat_FileChannel(name, chType, fileChannel);
+    DiaDat_FileChannel *ch = new DiaDat_FileChannel(name, chType, fileChannel, var);
     int32_t chIdx = channels.size();
     channels.push_back(ch);
     channelNumber[name] = chIdx;
@@ -105,4 +116,135 @@ DiaDat_DataFile *DiaDat_File::getDataFile(t_DiaDat_ChannelType type)
         return file;
     }else
         return it->second;
+}
+
+int8_t DiaDat_File::close(void)
+{
+    if (type == e_DiaDatFileType_None)
+        throw dbg_spintf("DiaDat_File::close - file is not yet open/created (%s)!", name.c_str());
+    if (type == e_DiaDatFileType_Read)
+    {
+        if (file != NULL)
+            fclose(file);
+    }else
+    { /* e_DiaDatFileType_Write */
+        if (t < 1e-12)
+            throw dbg_spintf("DiaDat_File::close - file is created, but no record is added (%s)!", name.c_str());
+        writeHeader();
+        if (file != NULL)
+            fclose(file);
+    }
+    type = e_DiaDatFileType_None;
+    return 0;
+}
+
+int8_t DiaDat_File::step(void)
+{
+    switch(type)
+    {
+    case e_DiaDatFileType_Read:
+        readRecord();
+        break;
+    case e_DiaDatFileType_Write:
+        writeRecord();
+        break;
+    default:
+        throw dbg_spintf("DiaDat_File::step - file is not yet open/created (%s)!", name.c_str());
+    }
+    t = t + dT;
+    recordCount++;
+    return 0;
+}
+
+int8_t DiaDat_File::readHeader()
+{
+    return 0;
+}
+
+int8_t DiaDat_File::writeHeader()
+{
+    writeHeaderLine("DIAEXTENDED  {@:ENGLISH");
+    writeHeaderLine("");
+    writeHeaderLine("#BEGINGLOBALHEADER");
+    writeHeaderLine("  1,WINDOWS 32Bit");
+    const char *versionStr ="version: not yet implemented";
+    writeHeaderLine("  2,LippiWare diadat_file %s", versionStr);
+    writeHeaderLine("101,");
+    writeHeaderLine("103,LippiWare diadat_file ", versionStr);
+    time_t current_time = time(NULL);
+    struct tm *tm = gmtime(&current_time);
+    char dateBuff[64];
+    strftime(dateBuff, sizeof(dateBuff), "%Y-%m-%d", tm);
+    if (strftime(dateBuff, sizeof(dateBuff), "%Y-%m-%d", tm) == 0)
+        throw dbg_spintf("DiaDat_File::writeHeader - strftime error (%s)!", name.c_str());
+    writeHeaderLine("104,%s", dateBuff);
+    if (strftime(dateBuff, sizeof(dateBuff), "%H-%M-%S", tm) == 0)
+        throw dbg_spintf("DiaDat_File::writeHeader - strftime 2 error (%s)!", name.c_str());
+    writeHeaderLine("105,%s", dateBuff);
+    writeHeaderLine("111,9.900000e+034");
+    writeHeaderLine("112,High -> Low");
+    writeHeaderLine("#ENDGLOBALHEADER");
+    writeHeaderLine("");
+    writeHeaderLine("#BEGINCHANNELHEADER");
+    writeHeaderLine("200,t");
+    writeHeaderLine("201,timeaxis");
+    writeHeaderLine("202,s");
+    writeHeaderLine("210,IMPLICIT");
+    writeHeaderLine("213,BLOCK");
+    writeHeaderLine("214,REAL64");
+    writeHeaderLine("220,%u", recordCount); /* number of records */
+    writeHeaderLine("240,0.00000000");
+    writeHeaderLine("241,%lf", dT);
+    writeHeaderLine("250,0.00000000");
+    writeHeaderLine("251,%lf", recordCount * dT);
+    writeHeaderLine("252,NO");
+    writeHeaderLine("253,increasing");
+    writeHeaderLine("260,Time");
+    writeHeaderLine("#ENDCHANNELHEADER");
+    writeHeaderLine("");
+    for (auto it = channels.begin() ; it != channels.end(); ++it)
+        writeChannelHeader(*it);
+    return 0;
+}
+
+int8_t DiaDat_File::writeChannelHeader(DiaDat_FileChannel *ch)
+{
+    writeHeaderLine("#BEGINCHANNELHEADER");
+    writeHeaderLine("200,%s", ch->getName().c_str());
+    writeHeaderLine("201,comment");
+    writeHeaderLine("202,%s", ch->getUnit().c_str());
+    writeHeaderLine("210,EXPLICIT");
+    writeHeaderLine("211,%s", ch->getFileName().c_str());
+    writeHeaderLine("213,BLOCK");
+    writeHeaderLine("214,%s", ch->getDiaDatFileType().c_str());
+    writeHeaderLine("220,%u", recordCount); /* number of records */
+    writeHeaderLine("221,%u", ch->getFileOffset());
+    writeHeaderLine("240,0.00000000");
+    writeHeaderLine("241,%lf", 0.00000000);
+    writeHeaderLine("250,0.00000000");
+    writeHeaderLine("251,0.00000000");
+    writeHeaderLine("260,Numeric");
+    writeHeaderLine("#ENDCHANNELHEADER");
+    writeHeaderLine("");
+    return 0;
+}
+
+int8_t DiaDat_File::writeHeaderLine(const char *pszFormat, ...)
+{
+    va_list argptr;
+    va_start(argptr, pszFormat);
+    vfprintf(file, pszFormat, argptr);
+    va_end(argptr);
+    fputs("\n", file);
+    return 0;
+}
+
+int8_t DiaDat_File::readRecord()
+{
+    return 0;
+}
+
+int8_t DiaDat_File::writeRecord()
+{
+    return 0;
 }

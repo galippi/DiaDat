@@ -13,7 +13,7 @@
 class DiaDat_ChannelDataS8 : public DiaDat_ChannelDataBase
 {
 public:
-    DiaDat_ChannelDataS8()
+    DiaDat_ChannelDataS8(void *var = NULL) : DiaDat_ChannelDataBase(var)
     {
         rawValue = 0;
         min = 0;
