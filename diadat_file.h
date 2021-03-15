@@ -15,10 +15,13 @@ typedef enum
   e_DiaDatFileType_Write,
 }t_DiaDatFileType;
 
+class DiaDat_File;
+
 class DiaDat_DataFile
 {
 public:
-    DiaDat_DataFile(const char *filenameBase, t_DiaDat_ChannelType type);
+    DiaDat_DataFile(DiaDat_File *_parent, const char *filenameBase, t_DiaDat_ChannelType type);
+    ~DiaDat_DataFile();
     void addChannel(DiaDat_Channel *channel);
     const std::string getName() const
     {
@@ -28,14 +31,19 @@ public:
     {
         return datFileType;
     }
+    t_DiaDatFileType getDirection() const;
+    int8_t writeRecord();
+    int8_t readRecord();
 protected:
     FILE *file;
     std::string filename;
     uint32_t blockSize;
+    uint8_t *block;
     uint32_t channelCount;
     t_DiaDat_ChannelType type;
     std::vector<DiaDat_Channel*> channels;
     std::string datFileType;
+    DiaDat_File *parent;
 };
 
 class DiaDat_ChannelType
@@ -88,6 +96,10 @@ class DiaDat_File
     int8_t close(void);
     int8_t step();
     void set_dT(double _dT){dT = _dT;}
+    t_DiaDatFileType getDirection() const
+    {
+        return type;
+    }
 
   protected:
     int8_t readHeader();

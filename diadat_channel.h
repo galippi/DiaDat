@@ -5,6 +5,8 @@
 
 #include <string>
 
+class DiaDat_DataFile;
+
 typedef enum
 {
   e_DiaDat_ChannelType_u8,
@@ -50,7 +52,7 @@ extern c_DiaDat_ChannelTypeBase DiaDat_ChannelType_s16;
 class DiaDat_ChannelDataBase
 {
   public:
-    DiaDat_ChannelDataBase(void *var = NULL);
+    DiaDat_ChannelDataBase(DiaDat_DataFile *_parent, void *var = NULL);
     virtual ~DiaDat_ChannelDataBase();
     virtual t_DiaDat_ChannelType getType() const = 0;
     virtual double getMin() const = 0;
@@ -70,17 +72,19 @@ class DiaDat_ChannelDataBase
     {
         return dataSize;
     }
-  private:
+    virtual int8_t update(uint8_t *block, uint32_t offset) = 0;
+  protected:
     uint8_t dataSize;
     void *dataPtr;
     bool conversionIsRequired;
+    DiaDat_DataFile *parent;
 };
 
 class DiaDat_Channel
 {
   public:
-    DiaDat_Channel(void *var = NULL);
-    DiaDat_Channel(const char *name, t_DiaDat_ChannelType type, void *var = NULL);
+    DiaDat_Channel(DiaDat_DataFile *_parent, void *var = NULL);
+    DiaDat_Channel(DiaDat_DataFile *_parent, const char *name, t_DiaDat_ChannelType type, void *var = NULL);
     ~DiaDat_Channel(){};
     DiaDat_ChannelDataBase *getDataHandler() const
     {
@@ -98,11 +102,13 @@ class DiaDat_Channel
     {
         return unit;
     }
+    int8_t update(uint8_t *block);
   protected:
     std::string name;
     std::string unit;
     DiaDat_ChannelDataBase *dataHandler;
     uint32_t offset;
+    DiaDat_DataFile *parent;
 };
 
 #endif /* _DIADAT_CHANNEL_H_ */

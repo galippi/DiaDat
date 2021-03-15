@@ -1,14 +1,17 @@
 #include <time.h>
 #include <stdarg.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #include "diadat_file.h"
 
 #include "my_debug.h"
 
-DiaDat_DataFile::DiaDat_DataFile(const char *filenameBase, t_DiaDat_ChannelType type)
+DiaDat_DataFile::DiaDat_DataFile(DiaDat_File *_parent, const char *filenameBase, t_DiaDat_ChannelType type)
 {
-    file = NULL;
+    parent = _parent;
     blockSize = 0;
+    block = NULL;
     channelCount = 0;
     this->type = type;
     filename = filenameBase;
@@ -30,18 +33,60 @@ DiaDat_DataFile::DiaDat_DataFile(const char *filenameBase, t_DiaDat_ChannelType 
             throw dbg_spintf("DiaDat_DataFile - Not implemented channel type %d!", type);
             break;
     }
+    file = NULL;
+}
+
+DiaDat_DataFile::~DiaDat_DataFile()
+{
+    if (file != NULL)
+        fclose(file);
+    if (block != NULL)
+        free(block);
+}
+
+t_DiaDatFileType DiaDat_DataFile::getDirection() const
+{
+    return parent->getDirection();
 }
 
 void DiaDat_DataFile::addChannel(DiaDat_Channel *channel)
 {
+    if (block != NULL)
+        throw dbg_spintf("DiaDat_DataFile::addChannel - not allowed state (%s)!", channel->getName().c_str());
     channel->setBlockOffset(blockSize);
     blockSize += channel->getDataHandler()->getDataSize();
     channelCount++;
     channels.push_back(channel);
 }
 
+int8_t DiaDat_DataFile::writeRecord()
+{
+    if (file == NULL)
+    {
+        file = fopen(filename.c_str(), "wb");
+        if (file == NULL)
+            throw dbg_spintf("DiaDat_DataFile::writeRecord - fopen failure - unable to create file (%s)!", filename.c_str());
+    }
+    if (block == NULL)
+    {
+        block = (uint8_t*)malloc(blockSize);
+        if (block == NULL)
+            throw dbg_spintf("DiaDat_DataFile::writeRecord - malloc failure (%u)!", blockSize);
+    }
+    for (auto it = channels.begin() ; it != channels.end(); ++it)
+    {
+        (*it)->update(block);
+    }
+    if (fwrite(block, 1, blockSize, file) != blockSize)
+    {
+        throw dbg_spintf("DiaDat_DataFile::writeRecord - fwrite failure. Is disk full? (%u)", blockSize);
+        return 1;
+    }
+    return 0;
+}
+
 DiaDat_FileChannel::DiaDat_FileChannel(const char *name, t_DiaDat_ChannelType type, DiaDat_DataFile *file, void *var)
-    : DiaDat_Channel(name, type, var)
+    : DiaDat_Channel(file, name, type, var)
 {
     this->file = file;
     file->addChannel(this);
@@ -111,7 +156,7 @@ DiaDat_DataFile *DiaDat_File::getDataFile(t_DiaDat_ChannelType type)
     std::map<t_DiaDat_ChannelType, DiaDat_DataFile*>::iterator it = dataFiles.find(type);
     if (it == dataFiles.end())
     {
-        DiaDat_DataFile *file = new DiaDat_DataFile(name.c_str(), type);
+        DiaDat_DataFile *file = new DiaDat_DataFile(this, name.c_str(), type);
         dataFiles[type] = file;
         return file;
     }else
@@ -246,5 +291,7 @@ int8_t DiaDat_File::readRecord()
 
 int8_t DiaDat_File::writeRecord()
 {
+    for (auto it = dataFiles.begin() ; it != dataFiles.end(); ++it)
+        it->second->writeRecord();
     return 0;
 }
