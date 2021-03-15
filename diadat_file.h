@@ -87,6 +87,7 @@ class DiaDat_File
 {
   public:
     DiaDat_File();
+    DiaDat_File(const char *filename, t_DiaDatFileType _type = e_DiaDatFileType_Read);
     ~DiaDat_File();
     int8_t open(const char *filename);
     int8_t create(const char *filename);
@@ -117,6 +118,9 @@ class DiaDat_File
     double dT;
     double t;
     uint32_t recordCount;
+
+  private:
+    void init();
 };
 
 #endif /* _DIADAT_FILE_H_ */

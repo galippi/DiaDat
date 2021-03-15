@@ -94,6 +94,27 @@ DiaDat_FileChannel::DiaDat_FileChannel(const char *name, t_DiaDat_ChannelType ty
 
 DiaDat_File::DiaDat_File()
 {
+    init();
+}
+
+DiaDat_File::DiaDat_File(const char *filename, t_DiaDatFileType _type)
+{
+    init();
+    switch(type)
+    {
+        case e_DiaDatFileType_Read:
+            open(filename);
+            break;
+        case e_DiaDatFileType_Write:
+            create(filename);
+            break;
+        default:
+            throw dbg_spintf("DiaDat_File - invalid file type in ctor (%s - %d)!", filename, _type);
+    }
+}
+
+void DiaDat_File::init()
+{
     type = e_DiaDatFileType_None;
     file = NULL;
     dT = -1;
@@ -115,6 +136,9 @@ int8_t DiaDat_File::open(const char *filename)
         throw dbg_spintf("DiaDat_File::open - file is already open/created (%s - %s)!", name.c_str(), filename);
     name = filename;
     type = e_DiaDatFileType_Read;
+    file = fopen(name.c_str(), "rt");
+    if (file == NULL)
+        throw dbg_spintf("DiaDat_File::open - file cannot be open (%s)!", name.c_str());
     readHeader();
     return 0;
 }
@@ -187,14 +211,14 @@ int8_t DiaDat_File::step(void)
 {
     switch(type)
     {
-    case e_DiaDatFileType_Read:
-        readRecord();
-        break;
-    case e_DiaDatFileType_Write:
-        writeRecord();
-        break;
-    default:
-        throw dbg_spintf("DiaDat_File::step - file is not yet open/created (%s)!", name.c_str());
+        case e_DiaDatFileType_Read:
+            readRecord();
+            break;
+        case e_DiaDatFileType_Write:
+            writeRecord();
+            break;
+        default:
+            throw dbg_spintf("DiaDat_File::step - file is not yet open/created (%s)!", name.c_str());
     }
     t = t + dT;
     recordCount++;
