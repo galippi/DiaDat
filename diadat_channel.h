@@ -103,6 +103,10 @@ class DiaDat_Channel
         return unit;
     }
     int8_t update(uint8_t *block);
+    uint32_t getDataSize() const
+    {
+        return dataHandler->getDataSize();
+    }
   protected:
     std::string name;
     std::string unit;

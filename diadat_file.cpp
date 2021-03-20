@@ -100,7 +100,7 @@ DiaDat_File::DiaDat_File()
 DiaDat_File::DiaDat_File(const char *filename, t_DiaDatFileType _type)
 {
     init();
-    switch(type)
+    switch(_type)
     {
         case e_DiaDatFileType_Read:
             open(filename);
@@ -287,7 +287,7 @@ int8_t DiaDat_File::writeChannelHeader(DiaDat_FileChannel *ch)
     writeHeaderLine("213,BLOCK");
     writeHeaderLine("214,%s", ch->getDiaDatFileType().c_str());
     writeHeaderLine("220,%u", recordCount); /* number of records */
-    writeHeaderLine("221,%u", ch->getFileOffset());
+    writeHeaderLine("221,%u", (ch->getFileOffset() / ch->getDataSize()) + 1);
     writeHeaderLine("240,0.00000000");
     writeHeaderLine("241,%lf", 0.00000000);
     writeHeaderLine("250,0.00000000");
