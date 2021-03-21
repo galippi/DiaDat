@@ -49,7 +49,7 @@ DiaDat_Channel::DiaDat_Channel(DiaDat_DataFile *_parent, const char *name, t_Dia
 DiaDat_Channel::DiaDat_Channel(DiaDat_File *_parent, ChannelData *chData)
 {
     name = chData->chName;
-    t_DiaDat_ChannelType chType = c_DiaDat_ChannelTypeBase::convert2type(chData->storeType.c_str());
+    t_DiaDat_ChannelType chType = c_DiaDat_ChannelTypeBase::convert2type(chData->dataType.c_str());
     auto fileChannel = _parent->getDataFile(chType);
     parent = fileChannel;
     offset = std::stoi(chData->channelIndex, nullptr, 10);
