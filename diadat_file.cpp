@@ -359,7 +359,7 @@ int8_t DiaDat_File::readHeader()
                         throw dbg_spintf("DiaDat_File::readHeader - channel is not ok (%s - line=%d)!", name.c_str(), lineNum);
                     if (!channelData.isEmpty())
                     {
-
+                        addChannel(&channelData);
                     }
                 }
                 else
