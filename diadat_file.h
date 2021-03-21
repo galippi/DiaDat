@@ -20,7 +20,7 @@ class DiaDat_File;
 class DiaDat_DataFile
 {
 public:
-    DiaDat_DataFile(DiaDat_File *_parent, const char *filenameBase, t_DiaDat_ChannelType type);
+    DiaDat_DataFile(DiaDat_File *_parent, const char *filenameBase, t_DiaDat_ChannelType type, const char *dataFileName);
     ~DiaDat_DataFile();
     void addChannel(DiaDat_Channel *channel);
     const std::string getName() const
@@ -63,10 +63,13 @@ protected:
     t_DiaDat_ChannelType type;
 };
 
+class ChannelData;
+
 class DiaDat_FileChannel : public DiaDat_Channel
 {
 public:
     DiaDat_FileChannel(const char *name, t_DiaDat_ChannelType type, DiaDat_DataFile *file, void *var);
+    DiaDat_FileChannel(DiaDat_File *_parent, ChannelData *chData);
     const std::string getFileName() const
     {
         return file->getName();
@@ -92,8 +95,9 @@ class DiaDat_File
     int8_t open(const char *filename);
     int8_t create(const char *filename);
     int32_t createChannel(const char *name, t_DiaDat_ChannelType type, void *var = NULL);
+    int32_t addChannel(ChannelData *chData);
     DiaDat_FileChannel *getChannel(int32_t chIdx);
-    DiaDat_DataFile *getDataFile(t_DiaDat_ChannelType type);
+    DiaDat_DataFile *getDataFile(t_DiaDat_ChannelType type, const char *filename = NULL);
     int8_t close(void);
     int8_t step();
     void set_dT(double _dT){dT = _dT;}
@@ -121,6 +125,7 @@ class DiaDat_File
 
   private:
     void init();
+    void chomp(char *line);
 };
 
 #endif /* _DIADAT_FILE_H_ */

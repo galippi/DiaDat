@@ -1,3 +1,8 @@
+#include <string>
+
+#include "diadat_file.h"
+#include "channel_data.h"
+
 #include "diadat_channel.h"
 
 #include "diadat_channel_s8.h"
@@ -6,10 +11,13 @@
 #include "my_debug.h"
 
 uint8_t c_DiaDat_ChannelTypeBase::idSource = 0;
-c_DiaDat_ChannelTypeBase DiaDat_ChannelType_u8("DiaDat_ChannelType_u8", "u8");
-c_DiaDat_ChannelTypeBase DiaDat_ChannelType_s8("DiaDat_ChannelType_s8", "s8");
-c_DiaDat_ChannelTypeBase DiaDat_ChannelType_u16("DiaDat_ChannelType_u16", "u16");
-c_DiaDat_ChannelTypeBase DiaDat_ChannelType_s16("DiaDat_ChannelType_s16", "s16");
+std::map<t_DiaDat_ChannelType, std::string*> c_DiaDat_ChannelTypeBase::type2datChannelType;
+std::map<std::string, t_DiaDat_ChannelType> c_DiaDat_ChannelTypeBase::datChannelType2type;
+
+c_DiaDat_ChannelTypeBase DiaDat_ChannelType_u8("DiaDat_ChannelType_u8", "u8", e_DiaDat_ChannelType_u8, "WORD8");
+//c_DiaDat_ChannelTypeBase DiaDat_ChannelType_s8("DiaDat_ChannelType_s8", "s8");
+c_DiaDat_ChannelTypeBase DiaDat_ChannelType_u16("DiaDat_ChannelType_u16", "u16", e_DiaDat_ChannelType_u16, "WORD16");
+//c_DiaDat_ChannelTypeBase DiaDat_ChannelType_s16("DiaDat_ChannelType_s16", "s16");
 
 DiaDat_ChannelDataBase::DiaDat_ChannelDataBase(DiaDat_DataFile *_parent, void *var)
 {
@@ -35,6 +43,21 @@ DiaDat_Channel::DiaDat_Channel(DiaDat_DataFile *_parent, void *var)
 DiaDat_Channel::DiaDat_Channel(DiaDat_DataFile *_parent, const char *name, t_DiaDat_ChannelType type, void *var)
 {
     this->name = name;
+    createDataHandler(_parent, type, var);
+}
+
+DiaDat_Channel::DiaDat_Channel(DiaDat_File *_parent, ChannelData *chData)
+{
+    name = chData->chName;
+    t_DiaDat_ChannelType chType = c_DiaDat_ChannelTypeBase::convert2type(chData->storeType.c_str());
+    auto fileChannel = _parent->getDataFile(chType);
+    parent = fileChannel;
+    offset = std::stoi(chData->channelIndex, nullptr, 10);
+    createDataHandler(parent, chType, NULL);
+}
+
+void DiaDat_Channel::createDataHandler(DiaDat_DataFile *_parent, t_DiaDat_ChannelType type, void *var)
+{
     switch(type)
     {
         case e_DiaDat_ChannelType_u8:

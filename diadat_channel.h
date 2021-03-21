@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #include <string>
+#include <map>
 
 class DiaDat_DataFile;
 
@@ -18,12 +19,16 @@ typedef enum
 class c_DiaDat_ChannelTypeBase
 {
 public:
-    c_DiaDat_ChannelTypeBase(const char *name, const char *datFileSuffix)
+    c_DiaDat_ChannelTypeBase(const char *name, const char *datFileSuffix, t_DiaDat_ChannelType _type, const char *_datChannelType)
     {
         id = idSource;
         idSource++;
         this->name = name;
         this->datFileSuffix = datFileSuffix;
+        datChannelType = _datChannelType;
+        type = _type;
+        type2datChannelType[type] = &datChannelType;
+        datChannelType2type[datChannelType] = type;
     }
     uint8_t getId() const
     {
@@ -37,11 +42,19 @@ public:
     {
         return datFileSuffix;
     }
+    static t_DiaDat_ChannelType convert2type(const char *typeName)
+    {
+        return datChannelType2type[typeName];
+    }
 protected:
     static uint8_t idSource;
     uint8_t id;
     const char *name;
     const char *datFileSuffix;
+    t_DiaDat_ChannelType type;
+    std::string datChannelType;
+    static std::map<t_DiaDat_ChannelType, std::string*> type2datChannelType;
+    static std::map<std::string, t_DiaDat_ChannelType> datChannelType2type;
 };
 
 extern c_DiaDat_ChannelTypeBase DiaDat_ChannelType_u8;
@@ -80,11 +93,15 @@ class DiaDat_ChannelDataBase
     DiaDat_DataFile *parent;
 };
 
+class ChannelData;
+class DiaDat_File;
+
 class DiaDat_Channel
 {
   public:
     DiaDat_Channel(DiaDat_DataFile *_parent, void *var = NULL);
     DiaDat_Channel(DiaDat_DataFile *_parent, const char *name, t_DiaDat_ChannelType type, void *var = NULL);
+    DiaDat_Channel(DiaDat_File *_parent, ChannelData *chData);
     ~DiaDat_Channel(){};
     DiaDat_ChannelDataBase *getDataHandler() const
     {
@@ -113,6 +130,8 @@ class DiaDat_Channel
     DiaDat_ChannelDataBase *dataHandler;
     uint32_t offset;
     DiaDat_DataFile *parent;
+  private:
+    void createDataHandler(DiaDat_DataFile *_parent, t_DiaDat_ChannelType type, void *var);
 };
 
 #endif /* _DIADAT_CHANNEL_H_ */
