@@ -26,27 +26,77 @@ public:
     std::string max;
     void init()
     {
-        chName = "";
-        unit = "";
-        storeType = "";
-        filename = "";
-        dataType = "";
-        recordCount = "";
-        channelIndex = "";
-        offset = "";
-        resolution = "";
-        min = "";
-        max = "";
+        chName.clear();
+        unit.clear();
+        storeType.clear();
+        filename.clear();
+        dataType.clear();
+        recordCount.clear();
+        channelIndex.clear();
+        offset.clear();
+        resolution.clear();
+        min.clear();
+        max.clear();
     }
     bool isOk()
     {
+        if (isEmpty())
+            return true;
+        if (chName.empty())
+            return false;
+        if (unit.empty())
+            return false;
+        if (storeType.empty())
+            return false;
+        if (filename.empty())
+        {
+            if (storeType != "IMPLICIT")
+                return false;
+        }
+        if (dataType.empty())
+            return false;
+        if (recordCount.empty())
+            return false;
+        if (channelIndex.empty())
+        {
+            if (storeType != "IMPLICIT")
+                return false;
+        }
+        if (offset.empty())
+            return false;
+        if (resolution.empty())
+            return false;
+        if (min.empty())
+            return false;
+        if (max.empty())
+            return false;
         return true;
     }
     bool isEmpty()
     {
-        if (chName == "")
-            return true;
-        return false;
+        if (!chName.empty())
+            return false;
+        if (!unit.empty())
+            return false;
+        if (!storeType.empty())
+            return false;
+        if (!filename.empty())
+            return false;
+        if (!dataType.empty())
+            return false;
+        if (!recordCount.empty())
+            return false;
+        if (!channelIndex.empty())
+            return false;
+        if (!offset.empty())
+            return false;
+        if (!resolution.empty())
+            return false;
+        if (!min.empty())
+            return false;
+        if (!max.empty())
+            return false;
+        return true;
     }
 };
 
