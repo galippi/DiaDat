@@ -10,6 +10,19 @@
 
 #include "my_debug.h"
 
+#if 1
+namespace std {
+    static int stoi( const std::string& str, std::size_t* pos = 0, int base = 10 )
+    {
+        (void)str;
+        (void)pos;
+        (void)base;
+        return 0;
+    }
+}
+
+#endif
+
 uint8_t c_DiaDat_ChannelTypeBase::idSource = 0;
 std::map<t_DiaDat_ChannelType, std::string*> c_DiaDat_ChannelTypeBase::type2datChannelType;
 std::map<std::string, t_DiaDat_ChannelType> c_DiaDat_ChannelTypeBase::datChannelType2type;
