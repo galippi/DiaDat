@@ -141,6 +141,8 @@ DiaDat_File::~DiaDat_File()
         throw dbg_spintf("DiaDat_File::dtor - file is not yet open/created (%s)!", name.c_str());
     if (file != NULL)
         fclose(file);
+    if (recordCount == 0)
+        throw dbg_spintf("DiaDat_File::dtor - file is empty (%s)!", name.c_str());
 }
 
 int8_t DiaDat_File::open(const char *filename)
@@ -174,7 +176,7 @@ int32_t DiaDat_File::addChannel(ChannelData *chData)
         throw dbg_spintf("DiaDat_File::addChannel - channel cannot be added for this type of file (%d - %s)!", type, chData->chName.c_str());
     auto it = channelNumber.find(chData->chName.c_str());
     if (it != channelNumber.end())
-        throw dbg_spintf("Duplicated channel name %s!", name);
+        throw dbg_spintf("Duplicated channel name %s!", name.c_str());
     //t_DiaDat_ChannelType chType = c_DiaDat_ChannelTypeBase::convert2type(chData->storeType.c_str());
     //auto fileChannel = getDataFile(chType);
     DiaDat_FileChannel *ch = new DiaDat_FileChannel(this, chData);
@@ -209,9 +211,7 @@ DiaDat_DataFile *DiaDat_File::getDataFile(t_DiaDat_ChannelType type, const char 
     std::map<t_DiaDat_ChannelType, DiaDat_DataFile*>::iterator it = dataFiles.find(type);
     if (it == dataFiles.end())
     {
-        if (filename == NULL)
-            filename = name.c_str();
-        DiaDat_DataFile *file = new DiaDat_DataFile(this, filename, type, filename);
+        DiaDat_DataFile *file = new DiaDat_DataFile(this, name.c_str(), type, filename);
         dataFiles[type] = file;
         return file;
     }else
@@ -240,6 +240,8 @@ int8_t DiaDat_File::close(void)
 
 int8_t DiaDat_File::step(void)
 {
+    if (dT < 1e-12)
+        throw dbg_spintf("DiaDat_File::step - dT is not yet set!", name.c_str());
     switch(type)
     {
         case e_DiaDatFileType_Read:
@@ -518,6 +520,8 @@ int8_t DiaDat_File::readRecord()
 
 int8_t DiaDat_File::writeRecord()
 {
+    if (recordCount == 0)
+        writeHeader();
     for (auto it = dataFiles.begin() ; it != dataFiles.end(); ++it)
         it->second->writeRecord();
     return 0;
