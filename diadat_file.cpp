@@ -31,6 +31,12 @@ DiaDat_DataFile::DiaDat_DataFile(DiaDat_File *_parent, const char *filenameBase,
             datFileType = "WORD8";
             break;
         }
+        case e_DiaDat_ChannelType_u16:
+        {
+            dataFileExt = ".u16";
+            datFileType = "WORD16";
+            break;
+        }
         default:
             throw dbg_spintf("DiaDat_DataFile - Not implemented channel type %d!", type);
             break;

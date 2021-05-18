@@ -7,6 +7,7 @@
 
 #include "diadat_channel_s8.h"
 #include "diadat_channel_u8.h"
+#include "diadat_channel_u16.h"
 
 #include "my_debug.h"
 
@@ -81,6 +82,11 @@ void DiaDat_Channel::createDataHandler(DiaDat_DataFile *_parent, t_DiaDat_Channe
         case e_DiaDat_ChannelType_s8:
         {
             dataHandler = new DiaDat_ChannelDataS8(_parent, var);
+            break;
+        }
+        case e_DiaDat_ChannelType_u16:
+        {
+            dataHandler = new DiaDat_ChannelDataU16(_parent, var);
             break;
         }
         default:
