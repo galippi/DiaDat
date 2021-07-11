@@ -1,5 +1,5 @@
 /*
- * diadat_channel_u16.h
+ * diadat_channel_R64.h
  *
  *  Created on: 2021. febr. 6.
  *      Author: liptakok

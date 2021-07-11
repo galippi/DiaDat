@@ -104,4 +104,4 @@ protected:
     double offset, factor;
 };
 
-#endif /* DIADAT_DIADAT_CHANNEL_S132_H_ */
+#endif /* DIADAT_DIADAT_CHANNEL_U32_H_ */
