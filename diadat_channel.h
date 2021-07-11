@@ -148,6 +148,10 @@ class DiaDat_Channel
     const std::string getFileName();
     const std::string getDiaDatFileType();
     unsigned getFileOffset();
+    void connectVar(void *var)
+    {
+        getDataHandler()->set(var);
+    }
   protected:
     std::string name;
     std::string unit;
