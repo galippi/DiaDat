@@ -190,7 +190,7 @@ const std::string DiaDat_Channel::getDiaDatFileType()
 
 unsigned DiaDat_Channel::getFileOffset()
 {
-    return 0;
+    return offset;
 }
 
 #if 0
