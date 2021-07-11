@@ -139,12 +139,12 @@ DiaDat_Channel::DiaDat_Channel(DiaDat_File *_parent, ChannelData *chData)
         dataFileName = _parent->getName() + "." + dataHandler->getFileExtension();
     else
         dataFileName = "IMPLICIT:";
-    parent = _parent->registerChannel(this, dataFileName, chData->storeType);
     if (chData->storeType == e_DiaDatFileStoreType_Explicit)
     {
         offset = (std::stoi(chData->channelIndex, nullptr, 10) - 1) * dataHandler->getDataSize();
     }else
         offset = -1;
+    parent = _parent->registerChannel(this, dataFileName, chData->storeType);
 }
 
 int8_t DiaDat_Channel::read()
