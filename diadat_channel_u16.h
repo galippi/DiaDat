@@ -13,7 +13,7 @@
 class DiaDat_ChannelDataU16 : public DiaDat_ChannelDataBase
 {
 public:
-    DiaDat_ChannelDataU16(DiaDat_DataFile *_parent, void *var = NULL) : DiaDat_ChannelDataBase(_parent, var)
+    DiaDat_ChannelDataU16(void *var = NULL) : DiaDat_ChannelDataBase(NULL, var)
     {
         dataSize = 2;
         rawValue = 0;
@@ -21,6 +21,14 @@ public:
         max = 0;
         offset = 0;
         factor = 1.0;
+        if (var == NULL)
+            dataPtr = &rawValue;
+        else
+            dataPtr = var;
+    }
+    const char *getFileExtension()
+    {
+        return "u16";
     }
     ~DiaDat_ChannelDataU16()
     {
@@ -50,15 +58,41 @@ public:
         rawValue = (uint16_t)((data - offset + (factor/2)) / factor);
         return 0;
     }
-    virtual int8_t update(uint8_t *block, uint32_t offset)
+
+    virtual int8_t read()
     {
-    	uint16_t val;
+        return write();
+    }
+    virtual int8_t read(const uint8_t *block)
+    {
+        if (dataPtr != NULL)
+        {
+            *(uint16_t*)dataPtr = block[0] + (((uint16_t)block[1]) * 256);
+        }
+        else
+        {
+            rawValue = block[0] + (((uint16_t)block[1]) * 256);
+        }
+        return 0;
+    }
+
+    virtual int8_t write()
+    {
+        if (dataPtr != NULL)
+            *(uint16_t*)dataPtr = (*(uint16_t*)dataPtr) + 1;
+        else
+            rawValue++;
+        return 0;
+    }
+    virtual int8_t write(uint8_t *block)
+    {
+        uint16_t val;
         if (dataPtr != NULL)
             val = *(uint16_t*)dataPtr;
         else
             val = rawValue;
-        block[offset] = val & 0xFF;
-        block[offset + 1] = (val >> 8) & 0xFF;
+        block[0] = val & 0xFF;
+        block[1] = (val >> 8) & 0xFF;
         return 0;
     }
 

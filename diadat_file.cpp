@@ -4,112 +4,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "diadat_file.h"
+#include "DiaDat_DataFile.h"
 #include "channel_data.h"
 
 #include "my_debug.h"
 
-DiaDat_DataFile::DiaDat_DataFile(DiaDat_File *_parent, const char *filenameBase, t_DiaDat_ChannelType type, const char *dataFileName)
-{
-    parent = _parent;
-    blockSize = 0;
-    block = NULL;
-    channelCount = 0;
-    this->type = type;
-    const char *dataFileExt;
-    switch(type)
-    {
-        case e_DiaDat_ChannelType_u8:
-        {
-            dataFileExt = ".u8";
-            datFileType = "WORD8";
-            break;
-        }
-        case e_DiaDat_ChannelType_s8:
-        {
-            dataFileExt = ".s8";
-            datFileType = "WORD8";
-            break;
-        }
-        case e_DiaDat_ChannelType_u16:
-        {
-            dataFileExt = ".u16";
-            datFileType = "WORD16";
-            break;
-        }
-        default:
-            throw dbg_spintf("DiaDat_DataFile - Not implemented channel type %d!", type);
-            break;
-    }
-    if (dataFileName != NULL)
-        filename = dataFileName;
-    else
-        filename = std::string(filenameBase) + dataFileExt;
-    file = NULL;
-}
-
-DiaDat_DataFile::~DiaDat_DataFile()
-{
-    if (file != NULL)
-        fclose(file);
-    if (block != NULL)
-        free(block);
-}
-
-t_DiaDatFileType DiaDat_DataFile::getDirection() const
-{
-    return parent->getDirection();
-}
-
-void DiaDat_DataFile::addChannel(DiaDat_Channel *channel)
-{
-    if (block != NULL)
-        throw dbg_spintf("DiaDat_DataFile::addChannel - not allowed state (%s)!", channel->getName().c_str());
-    channel->setBlockOffset(blockSize);
-    blockSize += channel->getDataHandler()->getDataSize();
-    channelCount++;
-    channels.push_back(channel);
-}
-
-int8_t DiaDat_DataFile::writeRecord()
-{
-    if (file == NULL)
-    {
-        file = fopen(filename.c_str(), "wb");
-        if (file == NULL)
-            throw dbg_spintf("DiaDat_DataFile::writeRecord - fopen failure - unable to create file (%s)!", filename.c_str());
-    }
-    if (block == NULL)
-    {
-        block = (uint8_t*)malloc(blockSize);
-        if (block == NULL)
-            throw dbg_spintf("DiaDat_DataFile::writeRecord - malloc failure (%u)!", blockSize);
-    }
-    for (auto it = channels.begin() ; it != channels.end(); ++it)
-    {
-        (*it)->update(block);
-    }
-    if (fwrite(block, 1, blockSize, file) != blockSize)
-    {
-        throw dbg_spintf("DiaDat_DataFile::writeRecord - fwrite failure. Is disk full? (%u)", blockSize);
-        return 1;
-    }
-    return 0;
-}
-
-DiaDat_FileChannel::DiaDat_FileChannel(const char *name, t_DiaDat_ChannelType type, DiaDat_DataFile *file, void *var)
-    : DiaDat_Channel(file, name, type, var)
-{
-    this->file = file;
-    file->addChannel(this);
-}
-
-DiaDat_FileChannel::DiaDat_FileChannel(DiaDat_File *_parent, ChannelData *chData)
-    : DiaDat_Channel(_parent, chData)
-{
-    //t_DiaDat_ChannelType chType = c_DiaDat_ChannelTypeBase::convert2type(chData->storeType.c_str());
-    //auto fileChannel = _parent->getDataFile(chType);
-}
+#include "diadat_file.h"
 
 DiaDat_File::DiaDat_File()
 {
@@ -143,12 +43,17 @@ void DiaDat_File::init()
 
 DiaDat_File::~DiaDat_File()
 {
-    if (type == e_DiaDatFileType_None)
+    if ((type == e_DiaDatFileType_None) || (file == NULL))
         throw dbg_spintf("DiaDat_File::dtor - file is not yet open/created (%s)!", name.c_str());
-    if (file != NULL)
-        fclose(file);
     if (recordCount == 0)
         throw dbg_spintf("DiaDat_File::dtor - file is empty (%s)!", name.c_str());
+    writeHeader();
+    for (auto it = dataFiles.begin() ; it != dataFiles.end(); ++it)
+    {
+        it->second->close();
+        delete it->second;
+    }
+    fclose(file);
 }
 
 int8_t DiaDat_File::open(const char *filename)
@@ -176,24 +81,33 @@ int8_t DiaDat_File::create(const char *filename)
     return 0;
 }
 
-int32_t DiaDat_File::addChannel(ChannelData *chData)
+DiaDat_Channel *DiaDat_File::addChannel(ChannelData *chData)
 {
     if (type != e_DiaDatFileType_Read)
         throw dbg_spintf("DiaDat_File::addChannel - channel cannot be added for this type of file (%d - %s)!", type, chData->chName.c_str());
-    auto it = channelNumber.find(chData->chName.c_str());
-    if (it != channelNumber.end())
-        throw dbg_spintf("Duplicated channel name %s!", name.c_str());
-    //t_DiaDat_ChannelType chType = c_DiaDat_ChannelTypeBase::convert2type(chData->storeType.c_str());
-    //auto fileChannel = getDataFile(chType);
-    DiaDat_FileChannel *ch = new DiaDat_FileChannel(this, chData);
-    int32_t chIdx = channels.size();
-    channels.push_back(ch);
-    channelNumber[chData->chName.c_str()] = chIdx;
-    return chIdx;
+    auto it = channels.find(chData->chName.c_str());
+    if (it != channels.end())
+        throw dbg_spintf("Duplicated channel name %s in file %s!", chData->chName.c_str(), name.c_str());
+    DiaDat_FileChannel *ch ;
+    if (chData->storeType == e_DiaDatFileStoreType_Implicit)
+    {
+        ch = new DiaDat_FileChannelImplicit(this, chData);
+    }else
+    {
+        //t_DiaDat_ChannelType chType = c_DiaDat_ChannelTypeBase::convert2type(chData->storeType.c_str());
+        //auto fileChannel = getDataFile(chType);
+        ch = new DiaDat_FileChannelExplicit(this, chData);
+    }
+    DiaDat_DataFile *fileChannel = ch->getDataFile();
+    dataFiles.insert(std::pair<std::string, DiaDat_DataFile*>(fileChannel->getName(), fileChannel));
+    channels[chData->chName.c_str()] = ch;
+    return ch;
 }
 
-int32_t DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelType chType, void *var)
+DiaDat_Channel *DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelType chType, void *var)
 {
+    (void)var;
+#if 0
     if (type != e_DiaDatFileType_Write)
         throw dbg_spintf("DiaDat_File::createChannel - channel cannot be created for this type of file (%d - %s)!", type, name);
     auto it = channelNumber.find(name);
@@ -205,13 +119,42 @@ int32_t DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelType chType
     channels.push_back(ch);
     channelNumber[name] = chIdx;
     return chIdx;
+#endif
+    if (type != e_DiaDatFileType_Write)
+        throw dbg_spintf("DiaDat_File::createChannel - channel cannot be created for this type of file (%d - %s)!", type, name);
+    auto it = channels.find(name);
+    if (it != channels.end())
+    {
+        throw dbg_spintf("Duplicated channel name %s!", name);
+        exit(1);
+    }
+    DiaDat_Channel * ch = DiaDat_Channel::createChannel(this, name, chType);
+    channels[name] = ch;
+    return ch;
 }
 
-DiaDat_FileChannel *DiaDat_File::getChannel(int32_t chIdx)
+void DiaDat_File::connectVar(const char *chName, void *var)
+{
+    DiaDat_Channel *ch = getChannel(chName);
+    ch->getDataHandler()->set(var);
+}
+
+DiaDat_Channel *DiaDat_File::getChannel(const char *chName)
+{
+    auto it = channels.find(chName);
+    if (it == channels.end())
+        throw dbg_spintf("Error: unable to connect variable to channel name %s!", name);
+     return it->second;
+}
+
+#if 0
+DiaDat_Channel *DiaDat_File::getChannel(int32_t chIdx)
 {
   return channels[chIdx];
 }
+#endif
 
+#if 0
 DiaDat_DataFile *DiaDat_File::getDataFile(t_DiaDat_ChannelType type, const char *filename)
 {
     std::map<t_DiaDat_ChannelType, DiaDat_DataFile*>::iterator it = dataFiles.find(type);
@@ -223,6 +166,35 @@ DiaDat_DataFile *DiaDat_File::getDataFile(t_DiaDat_ChannelType type, const char 
     }else
         return it->second;
 }
+#endif
+
+DiaDat_DataFile *DiaDat_File::registerChannel(DiaDat_Channel *ch, const std::string &dataFileName, t_DiaDatFileStoreType storeType)
+{
+    DiaDat_DataFile *file;
+    std::map<std::string, DiaDat_DataFile*>::iterator it = dataFiles.find(dataFileName);
+    if (it == dataFiles.end())
+    {
+        if (storeType == e_DiaDatFileStoreType_Explicit)
+            file = new DiaDat_DataFileExplicit(this, ch, dataFileName);
+        else
+            file = new DiaDat_DataFileImplicit(this, ch);
+        dataFiles[dataFileName] = file;
+    }else
+        file = it->second;
+    file->addChannel(ch);
+    channels[ch->getName()] = ch;
+    //if (!file->isImplicit())
+    //{
+    //    DiaDat_DataFileExplicit *fe = dynamic_cast<DiaDat_DataFileExplicit *>(file);
+    //    fe->addChannel(ch);
+    //}
+    return file;
+}
+
+DiaDat_DataFile *DiaDat_File::getDataFile(const char *filename)
+{
+    return dataFiles[filename];
+}
 
 int8_t DiaDat_File::close(void)
 {
@@ -232,6 +204,8 @@ int8_t DiaDat_File::close(void)
     {
         if (file != NULL)
             fclose(file);
+        for (auto it = dataFiles.begin() ; it != dataFiles.end(); ++it)
+            it->second->close();
     }else
     { /* e_DiaDatFileType_Write */
         if (t < 1e-12)
@@ -239,6 +213,8 @@ int8_t DiaDat_File::close(void)
         writeHeader();
         if (file != NULL)
             fclose(file);
+        for (auto it = dataFiles.begin() ; it != dataFiles.end(); ++it)
+            it->second->close();
     }
     type = e_DiaDatFileType_None;
     return 0;
@@ -246,14 +222,14 @@ int8_t DiaDat_File::close(void)
 
 int8_t DiaDat_File::step(void)
 {
-    if (dT < 1e-12)
-        throw dbg_spintf("DiaDat_File::step - dT is not yet set!", name.c_str());
     switch(type)
     {
         case e_DiaDatFileType_Read:
             readRecord();
             break;
         case e_DiaDatFileType_Write:
+            if (dT < 1e-12)
+                throw dbg_spintf("DiaDat_File::step - dT is not yet set!", name.c_str());
             writeRecord();
             break;
         default:
@@ -357,17 +333,18 @@ int8_t DiaDat_File::readHeader()
                 if (strcmp(line, "#BEGINCHANNELHEADER") != 0)
                     throw dbg_spintf("DiaDat_File::readHeader - e_AfterFileHeader - invalid file header (%s - %s)!", name.c_str(), line);
                 headerState = e_Channel;
-                channelData.init();
+                channelData.clear();
                 break;
             case e_Channel:
                 if (strcmp(line, "#ENDCHANNELHEADER") == 0)
                 {
                     headerState = e_AfterFileHeader;
-                    if (!channelData.isOk())
-                        throw dbg_spintf("DiaDat_File::readHeader - channel is not ok (%s - line=%d)!", name.c_str(), lineNum);
                     if (!channelData.isEmpty())
                     {
+                        if (!channelData.isOk())
+                            throw dbg_spintf("DiaDat_File::readHeader - channel is not ok (%s - line=%d)!", name.c_str(), lineNum);
                         addChannel(&channelData);
+                        channelData.clear();
                     }
                 }
                 else
@@ -384,7 +361,12 @@ int8_t DiaDat_File::readHeader()
                             channelData.unit = headerInfo.value;
                             break;
                         case 210:
-                            channelData.storeType = headerInfo.value;
+                            if (strcmp(headerInfo.value, "IMPLICIT") == 0)
+                                channelData.storeType = e_DiaDatFileStoreType_Implicit;
+                            else if (strcmp(headerInfo.value, "EXPLICIT") == 0)
+                                channelData.storeType = e_DiaDatFileStoreType_Explicit;
+                            else
+                                throw dbg_spintf("DiaDat_File::readHeader - invalid channel header store type (%s - line=%s type=%d val=%s)!", name.c_str(), line, headerInfo.headerType, headerInfo.value);
                             break;
                         case 211:
                             channelData.filename = headerInfo.value;
@@ -415,17 +397,17 @@ int8_t DiaDat_File::readHeader()
                             channelData.max = headerInfo.value;
                             break;
                         case 252:
-                            if ((channelData.storeType != "IMPLICIT") || (strcmp(headerInfo.value, "NO") != 0))
-                                throw dbg_spintf("DiaDat_File::readHeader - invalid channel header store format (%s - line=%s type=%d val=%s storeType=%s)!", name.c_str(), line, headerInfo.headerType, headerInfo.value, channelData.storeType.c_str());
+                            if ((channelData.storeType != e_DiaDatFileStoreType_Implicit) || (strcmp(headerInfo.value, "NO") != 0))
+                                throw dbg_spintf("DiaDat_File::readHeader - invalid channel header store format (%s - line=%s type=%d val=%s storeType=%d)!", name.c_str(), line, headerInfo.headerType, headerInfo.value, channelData.storeType);
                             break;
                         case 253:
-                            if ((channelData.storeType != "IMPLICIT") || (strcmp(headerInfo.value, "increasing") != 0))
-                                throw dbg_spintf("DiaDat_File::readHeader - invalid channel header store format (%s - line=%s type=%d val=%s storeType=%s)!", name.c_str(), line, headerInfo.headerType, headerInfo.value, channelData.storeType.c_str());
+                            if ((channelData.storeType != e_DiaDatFileStoreType_Implicit) || (strcmp(headerInfo.value, "increasing") != 0))
+                                throw dbg_spintf("DiaDat_File::readHeader - invalid channel header store format (%s - line=%s type=%d val=%s storeType=%d)!", name.c_str(), line, headerInfo.headerType, headerInfo.value, channelData.storeType);
                             break;
                         case 260:
-                            if (! (((channelData.storeType == "IMPLICIT") && (strcmp(headerInfo.value, "Time") == 0)) ||
-                                   ((channelData.storeType == "EXPLICIT") && (strcmp(headerInfo.value, "Numeric") == 0))))
-                                throw dbg_spintf("DiaDat_File::readHeader - invalid channel header store format (%s - line=%s type=%d val=%s storeType=%s)!", name.c_str(), line, headerInfo.headerType, headerInfo.value, channelData.storeType.c_str());
+                            if (! (((channelData.storeType == e_DiaDatFileStoreType_Implicit) && (strcmp(headerInfo.value, "Time") == 0)) ||
+                                   ((channelData.storeType == e_DiaDatFileStoreType_Explicit) && (strcmp(headerInfo.value, "Numeric") == 0))))
+                                throw dbg_spintf("DiaDat_File::readHeader - invalid channel header store format (%s - line=%s type=%d val=%s storeType=%d)!", name.c_str(), line, headerInfo.headerType, headerInfo.value, channelData.storeType);
                             break;
                         default:
                             throw dbg_spintf("DiaDat_File::readHeader - invalid channel header type (%s - line=%s type=%d val=%s)!", name.c_str(), line, headerInfo.headerType, headerInfo.value);
@@ -437,7 +419,6 @@ int8_t DiaDat_File::readHeader()
                 break;
         }
     }
-    throw dbg_spintf("DiaDat_File::readHeader - not yet implemented (%s)!", name.c_str());
     return 0;
 }
 
@@ -483,11 +464,11 @@ int8_t DiaDat_File::writeHeader()
     writeHeaderLine("#ENDCHANNELHEADER");
     writeHeaderLine("");
     for (auto it = channels.begin() ; it != channels.end(); ++it)
-        writeChannelHeader(*it);
+        writeChannelHeader(it->second);
     return 0;
 }
 
-int8_t DiaDat_File::writeChannelHeader(DiaDat_FileChannel *ch)
+int8_t DiaDat_File::writeChannelHeader(DiaDat_Channel *ch)
 {
     writeHeaderLine("#BEGINCHANNELHEADER");
     writeHeaderLine("200,%s", ch->getName().c_str());
@@ -521,13 +502,13 @@ int8_t DiaDat_File::writeHeaderLine(const char *pszFormat, ...)
 
 int8_t DiaDat_File::readRecord()
 {
+    for (auto it = dataFiles.begin() ; it != dataFiles.end(); ++it)
+        it->second->readRecord();
     return 0;
 }
 
 int8_t DiaDat_File::writeRecord()
 {
-    if (recordCount == 0)
-        writeHeader();
     for (auto it = dataFiles.begin() ; it != dataFiles.end(); ++it)
         it->second->writeRecord();
     return 0;

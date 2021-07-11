@@ -8,43 +8,7 @@
 
 #include "diadat_channel.h"
 
-typedef enum
-{
-  e_DiaDatFileType_None,
-  e_DiaDatFileType_Read,
-  e_DiaDatFileType_Write,
-}t_DiaDatFileType;
-
-class DiaDat_File;
-
-class DiaDat_DataFile
-{
-public:
-    DiaDat_DataFile(DiaDat_File *_parent, const char *filenameBase, t_DiaDat_ChannelType type, const char *dataFileName);
-    ~DiaDat_DataFile();
-    void addChannel(DiaDat_Channel *channel);
-    const std::string getName() const
-    {
-        return filename;
-    }
-    const std::string getDiaDatFileType() const
-    {
-        return datFileType;
-    }
-    t_DiaDatFileType getDirection() const;
-    int8_t writeRecord();
-    int8_t readRecord();
-protected:
-    FILE *file;
-    std::string filename;
-    uint32_t blockSize;
-    uint8_t *block;
-    uint32_t channelCount;
-    t_DiaDat_ChannelType type;
-    std::vector<DiaDat_Channel*> channels;
-    std::string datFileType;
-    DiaDat_File *parent;
-};
+#include "DiaDat_FileType.h"
 
 class DiaDat_ChannelType
 {
@@ -63,28 +27,7 @@ protected:
     t_DiaDat_ChannelType type;
 };
 
-class ChannelData;
-
-class DiaDat_FileChannel : public DiaDat_Channel
-{
-public:
-    DiaDat_FileChannel(const char *name, t_DiaDat_ChannelType type, DiaDat_DataFile *file, void *var);
-    DiaDat_FileChannel(DiaDat_File *_parent, ChannelData *chData);
-    const std::string getFileName() const
-    {
-        return file->getName();
-    }
-    const std::string getDiaDatFileType() const
-    {
-        return file->getDiaDatFileType();
-    }
-    uint32_t getFileOffset() const
-    {
-        return offset;
-    }
-    protected:
-    DiaDat_DataFile *file;
-};
+class DiaDat_FileChannel;
 
 class DiaDat_File
 {
@@ -94,10 +37,14 @@ class DiaDat_File
     ~DiaDat_File();
     int8_t open(const char *filename);
     int8_t create(const char *filename);
-    int32_t createChannel(const char *name, t_DiaDat_ChannelType type, void *var = NULL);
-    int32_t addChannel(ChannelData *chData);
-    DiaDat_FileChannel *getChannel(int32_t chIdx);
-    DiaDat_DataFile *getDataFile(t_DiaDat_ChannelType type, const char *filename = NULL);
+    DiaDat_Channel *createChannel(const char *name, t_DiaDat_ChannelType type, void *var = NULL);
+    DiaDat_Channel *addChannel(ChannelData *chData);
+    void connectVar(const char *chName, void *var);
+    DiaDat_Channel *getChannel(const char *chName);
+    //DiaDat_Channel *getChannel(int32_t chIdx);
+    //DiaDat_DataFile *getDataFile(t_DiaDat_ChannelType type, const char *filename = NULL);
+    DiaDat_DataFile *registerChannel(DiaDat_Channel *ch, const std::string &dataFileName, t_DiaDatFileStoreType storeType = e_DiaDatFileStoreType_Explicit);
+    DiaDat_DataFile *getDataFile(const char *filename);
     int8_t close(void);
     int8_t step();
     void set_dT(double _dT){dT = _dT;}
@@ -105,19 +52,22 @@ class DiaDat_File
     {
         return type;
     }
+    std::string getName()
+    {
+        return name;
+    }
 
   protected:
     int8_t readHeader();
     int8_t readRecord();
     int8_t writeHeader();
     int8_t writeRecord();
-    int8_t writeChannelHeader(DiaDat_FileChannel *ch);
+    int8_t writeChannelHeader(DiaDat_Channel *ch);
     int8_t writeHeaderLine(const char *fmt, ...);
     std::string name;
     t_DiaDatFileType type;
-    std::vector<DiaDat_FileChannel*> channels;
-    std::map<t_DiaDat_ChannelType, DiaDat_DataFile*> dataFiles;
-    std::map<const char *, int32_t> channelNumber;
+    std::map<std::string, DiaDat_DataFile*> dataFiles;
+    std::map<std::string, DiaDat_Channel*> channels;
     FILE *file;
     double dT;
     double t;

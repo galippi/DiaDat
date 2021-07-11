@@ -1,22 +1,24 @@
 /*
- * diadat_channel_u8.h
+ * diadat_channel_u16.h
  *
  *  Created on: 2021. febr. 6.
  *      Author: liptakok
  */
 
-#ifndef DIADAT_DIADAT_CHANNEL_U8_H_
-#define DIADAT_DIADAT_CHANNEL_U8_H_
+#ifndef DIADAT_DIADAT_CHANNEL_R64_H_
+#define DIADAT_DIADAT_CHANNEL_R64_H_
+
+#include <memory.h>
 
 #include "diadat_channel.h"
 
-class DiaDat_ChannelDataU8 : public DiaDat_ChannelDataBase
+class DiaDat_ChannelDataR64 : public DiaDat_ChannelDataBase
 {
 public:
-    DiaDat_ChannelDataU8(void *var = NULL) : DiaDat_ChannelDataBase(NULL, var)
+    DiaDat_ChannelDataR64(void *var = NULL) : DiaDat_ChannelDataBase(NULL, var)
     {
-        dataSize = 1;
-        rawValue = 0;
+        dataSize = 8;
+        rawValue = 0.0;
         min = 0;
         max = 0;
         offset = 0;
@@ -28,14 +30,14 @@ public:
     }
     const char *getFileExtension()
     {
-        return "u8";
+        return "r64";
     }
-    ~DiaDat_ChannelDataU8()
+    ~DiaDat_ChannelDataR64()
     {
     }
     t_DiaDat_ChannelType getType() const
     {
-        return e_DiaDat_ChannelType_u8;
+        return e_DiaDat_ChannelType_d64;
     }
     double getMin() const
     {
@@ -55,7 +57,7 @@ public:
     }
     int8_t set(double data)
     {
-        rawValue = (uint8_t)((data - offset + (factor/2)) / factor);
+        rawValue = data;
         return 0;
     }
 
@@ -65,35 +67,34 @@ public:
     }
     virtual int8_t read(const uint8_t *block)
     {
-        if (dataPtr != NULL)
-            *(uint8_t*)dataPtr = block[0];
-        else
-            rawValue = block[0];
+        memcpy(dataPtr, block, sizeof(double));
         return 0;
     }
 
     virtual int8_t write()
     {
         if (dataPtr != NULL)
-            *(uint8_t*)dataPtr = (*(uint8_t*)dataPtr) + 1;
+            *(double*)dataPtr = (*(double*)dataPtr) + 1;
         else
-            rawValue++;
+            rawValue += factor;
         return 0;
     }
     virtual int8_t write(uint8_t *block)
     {
+        double val;
         if (dataPtr != NULL)
-            block[0] = *(uint8_t*)dataPtr;
+            val = *(double*)dataPtr;
         else
-            block[0] = rawValue;
+            val = rawValue;
+        memcpy(block, &val, sizeof(val));
         return 0;
     }
 
 protected:
-    uint8_t min;
-    uint8_t max;
-    uint8_t rawValue;
+    double min;
+    double max;
+    double rawValue;
     double offset, factor;
 };
 
-#endif /* DIADAT_DIADAT_CHANNEL_U8_H_ */
+#endif /* DIADAT_DIADAT_CHANNEL_R64_H_ */

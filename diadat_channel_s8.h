@@ -13,7 +13,7 @@
 class DiaDat_ChannelDataS8 : public DiaDat_ChannelDataBase
 {
 public:
-    DiaDat_ChannelDataS8(DiaDat_DataFile *_parent, void *var = NULL) : DiaDat_ChannelDataBase(_parent, var)
+    DiaDat_ChannelDataS8(void *var = NULL) : DiaDat_ChannelDataBase(NULL, var)
     {
         dataSize = 1;
         rawValue = 0;
@@ -21,13 +21,21 @@ public:
         max = 0;
         offset = 0;
         factor = 1.0;
+        if (var == NULL)
+            dataPtr = &rawValue;
+        else
+            dataPtr = var;
+    }
+    const char *getFileExtension()
+    {
+        return "s8";
     }
     ~DiaDat_ChannelDataS8()
     {
     }
     t_DiaDat_ChannelType getType() const
     {
-        return e_DiaDat_ChannelType_u8;
+        return e_DiaDat_ChannelType_s8;
     }
     double getMin() const
     {
@@ -50,12 +58,34 @@ public:
         rawValue = (int8_t)((data - offset + (factor/2)) / factor);
         return 0;
     }
-    virtual int8_t update(uint8_t *block, uint32_t offset)
+
+    virtual int8_t read()
+    {
+        return write();
+    }
+    virtual int8_t read(const uint8_t *block)
     {
         if (dataPtr != NULL)
-            block[offset] = (uint8_t)*(int8_t*)dataPtr;
+            *(int8_t*)dataPtr = (int8_t)block[0];
         else
-            block[offset] = (uint8_t)rawValue;
+            rawValue = (int8_t)block[0];
+        return 0;
+    }
+
+    virtual int8_t write()
+    {
+        if (dataPtr != NULL)
+            *(int8_t*)dataPtr = (*(int8_t*)dataPtr) + 1;
+        else
+            rawValue++;
+        return 0;
+    }
+    virtual int8_t write(uint8_t *block)
+    {
+        if (dataPtr != NULL)
+            block[0] = (uint8_t)*(int8_t*)dataPtr;
+        else
+            block[0] = (uint8_t)rawValue;
         return 0;
     }
 

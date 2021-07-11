@@ -10,10 +10,18 @@ class DiaDat_DataFile;
 
 typedef enum
 {
+    e_DiaDat_Implicit,
+    e_DiaDat_Explicit,
+}t_DiaDat_ChannelStoreMode;
+
+typedef enum
+{
   e_DiaDat_ChannelType_u8,
   e_DiaDat_ChannelType_s8,
   e_DiaDat_ChannelType_u16,
   e_DiaDat_ChannelType_s16,
+  e_DiaDat_ChannelType_d32,
+  e_DiaDat_ChannelType_d64,
 }t_DiaDat_ChannelType;
 
 class c_DiaDat_ChannelTypeBase
@@ -27,7 +35,7 @@ public:
         this->datFileSuffix = datFileSuffix;
         datChannelType = _datChannelType;
         type = _type;
-        type2datChannelType[type] = &datChannelType;
+        type2datChannelType[type] = datChannelType;
         datChannelType2type[datChannelType] = type;
     }
     uint8_t getId() const
@@ -42,10 +50,8 @@ public:
     {
         return datFileSuffix;
     }
-    static t_DiaDat_ChannelType convert2type(const char *typeName)
-    {
-        return datChannelType2type[typeName];
-    }
+    static t_DiaDat_ChannelType convert2type(const char *typeName);
+    static const std::string &getChannelType(t_DiaDat_ChannelType type);
 protected:
     static uint8_t idSource;
     uint8_t id;
@@ -53,7 +59,7 @@ protected:
     const char *datFileSuffix;
     t_DiaDat_ChannelType type;
     std::string datChannelType;
-    static std::map<t_DiaDat_ChannelType, std::string*> type2datChannelType;
+    static std::map<t_DiaDat_ChannelType, std::string> type2datChannelType;
     static std::map<std::string, t_DiaDat_ChannelType> datChannelType2type;
 };
 
@@ -81,11 +87,20 @@ class DiaDat_ChannelDataBase
         conversionIsRequired = true;
         dataPtr = data;
     }
+    virtual void set(void *data)
+    {
+        conversionIsRequired = false;
+        dataPtr = data;
+    }
     uint8_t getDataSize() const
     {
         return dataSize;
     }
-    virtual int8_t update(uint8_t *block, uint32_t offset) = 0;
+    virtual int8_t read() = 0;
+    virtual int8_t read(const uint8_t *buffer) = 0;
+    virtual int8_t write() = 0;
+    virtual int8_t write(uint8_t *buffer) = 0;
+    virtual const char *getFileExtension() = 0;
   protected:
     uint8_t dataSize;
     void *dataPtr;
@@ -99,9 +114,12 @@ class DiaDat_File;
 class DiaDat_Channel
 {
   public:
-    DiaDat_Channel(DiaDat_DataFile *_parent, void *var = NULL);
-    DiaDat_Channel(DiaDat_DataFile *_parent, const char *name, t_DiaDat_ChannelType type, void *var = NULL);
+    //DiaDat_Channel(DiaDat_DataFile *_parent, void *var = NULL);
+    //DiaDat_Channel(DiaDat_DataFile *_parent, const char *name, t_DiaDat_ChannelType type, void *var = NULL);
+    //static DiaDat_Channel *createChannel(DiaDat_File *_parent, ChannelData *chData);
+    static DiaDat_Channel *createChannel(DiaDat_File *_parent, const char *name, t_DiaDat_ChannelType type, void *var = NULL);
     DiaDat_Channel(DiaDat_File *_parent, ChannelData *chData);
+    DiaDat_Channel(DiaDat_File *_parent, const char *name, DiaDat_ChannelDataBase *chData);
     ~DiaDat_Channel(){};
     DiaDat_ChannelDataBase *getDataHandler() const
     {
@@ -119,11 +137,17 @@ class DiaDat_Channel
     {
         return unit;
     }
-    int8_t update(uint8_t *block);
+    int8_t read();
+    int8_t read(const uint8_t *buffer);
+    int8_t write();
+    int8_t write(uint8_t *buffer);
     uint32_t getDataSize() const
     {
         return dataHandler->getDataSize();
     }
+    const std::string getFileName();
+    const std::string getDiaDatFileType();
+    unsigned getFileOffset();
   protected:
     std::string name;
     std::string unit;
