@@ -36,9 +36,8 @@ void DiaDat_File::init()
 {
     type = e_DiaDatFileType_None;
     file = NULL;
-    dT = -1;
-    t = 0;
     recordCount = 0;
+    recordIdx = 0;
 }
 
 DiaDat_File::~DiaDat_File()
@@ -175,6 +174,13 @@ DiaDat_Channel *DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelTyp
     return ch;
 }
 
+DiaDat_Channel *DiaDat_File::createImpliciteTimeChannel(const char *name, double dT)
+{
+    (void)name;
+    (void)dT;
+    /* not yet implemented*/
+    return NULL;
+}
 
 void DiaDat_File::connectVar(const char *chName, uint8_t *var)
 {
@@ -293,7 +299,7 @@ int8_t DiaDat_File::close(void)
             it->second->close();
     }else
     { /* e_DiaDatFileType_Write */
-        if (t < 1e-12)
+        if (recordCount == 0)
             throw dbg_spintf("DiaDat_File::close - file is created, but no record is added (%s)!", name.c_str());
         writeHeader();
         if (file != NULL)
@@ -313,15 +319,13 @@ int8_t DiaDat_File::step(void)
             readRecord();
             break;
         case e_DiaDatFileType_Write:
-            if (dT < 1e-12)
-                throw dbg_spintf("DiaDat_File::step - dT is not yet set!", name.c_str());
             writeRecord();
+            recordCount++;
             break;
         default:
             throw dbg_spintf("DiaDat_File::step - file is not yet open/created (%s)!", name.c_str());
     }
-    t = t + dT;
-    recordCount++;
+    recordIdx++;
     return 0;
 }
 
@@ -540,9 +544,9 @@ int8_t DiaDat_File::writeHeader()
     writeHeaderLine("214,REAL64");
     writeHeaderLine("220,%u", recordCount); /* number of records */
     writeHeaderLine("240,0.00000000");
-    writeHeaderLine("241,%lf", dT);
+    writeHeaderLine("241,%lf", 0.01 /*dT*/);
     writeHeaderLine("250,0.00000000");
-    writeHeaderLine("251,%lf", recordCount * dT);
+    writeHeaderLine("251,%lf", recordCount * 0.01 /*dT*/);
     writeHeaderLine("252,NO");
     writeHeaderLine("253,increasing");
     writeHeaderLine("260,Time");

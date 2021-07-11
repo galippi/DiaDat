@@ -57,6 +57,12 @@ class DiaDat_File
     void connectVar(const char *chName, double *var);
     void connectVar(const char *chName, float *var);
 
+    DiaDat_Channel *createImpliciteTimeChannel(const char *name, double dT);
+    DiaDat_Channel *createImpliciteTimeChannel(double dT)
+    {
+        return createImpliciteTimeChannel("t", dT);
+    }
+
     DiaDat_Channel *getChannel(const char *chName);
     //DiaDat_Channel *getChannel(int32_t chIdx);
     //DiaDat_DataFile *getDataFile(t_DiaDat_ChannelType type, const char *filename = NULL);
@@ -64,7 +70,6 @@ class DiaDat_File
     DiaDat_DataFile *getDataFile(const char *filename);
     int8_t close(void);
     int8_t step();
-    void set_dT(double _dT){dT = _dT;}
     t_DiaDatFileType getDirection() const
     {
         return type;
@@ -86,9 +91,8 @@ class DiaDat_File
     std::map<std::string, DiaDat_DataFile*> dataFiles;
     std::map<std::string, DiaDat_Channel*> channels;
     FILE *file;
-    double dT;
-    double t;
     uint32_t recordCount;
+    uint32_t recordIdx;
 
   private:
     void init();
