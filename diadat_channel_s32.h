@@ -55,7 +55,7 @@ public:
     }
     int8_t set(double data)
     {
-        rawValue = (uint16_t)((data - offset + (factor/2)) / factor);
+        rawValue = (int32_t)((data - offset + (factor/2)) / factor);
         return 0;
     }
 

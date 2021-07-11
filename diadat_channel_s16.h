@@ -1,5 +1,5 @@
 /*
- * diadat_channel_u16.h
+ * diadat_channel_s16.h
  *
  *  Created on: 2021. febr. 6.
  *      Author: liptakok
@@ -55,7 +55,7 @@ public:
     }
     int8_t set(double data)
     {
-        rawValue = (uint16_t)((data - offset + (factor/2)) / factor);
+        rawValue = (int16_t)((data - offset + (factor/2)) / factor);
         return 0;
     }
 
@@ -86,7 +86,7 @@ public:
     }
     virtual int8_t write(uint8_t *block)
     {
-        uint16_t val;
+        int16_t val;
         if (dataPtr != NULL)
             val = *(int16_t*)dataPtr;
         else
