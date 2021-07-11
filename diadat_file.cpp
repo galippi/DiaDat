@@ -106,7 +106,6 @@ DiaDat_Channel *DiaDat_File::addChannel(ChannelData *chData)
 
 DiaDat_Channel *DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelType chType, void *var)
 {
-    (void)var;
 #if 0
     if (type != e_DiaDatFileType_Write)
         throw dbg_spintf("DiaDat_File::createChannel - channel cannot be created for this type of file (%d - %s)!", type, name);
@@ -130,6 +129,8 @@ DiaDat_Channel *DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelTyp
     }
     DiaDat_Channel * ch = DiaDat_Channel::createChannel(this, name, chType);
     channels[name] = ch;
+    if (var != NULL)
+        ch->connectVar(var);
     return ch;
 }
 
