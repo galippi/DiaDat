@@ -20,6 +20,8 @@ typedef enum
   e_DiaDat_ChannelType_s8,
   e_DiaDat_ChannelType_u16,
   e_DiaDat_ChannelType_s16,
+  e_DiaDat_ChannelType_u32,
+  e_DiaDat_ChannelType_s32,
   e_DiaDat_ChannelType_d32,
   e_DiaDat_ChannelType_d64,
 }t_DiaDat_ChannelType;

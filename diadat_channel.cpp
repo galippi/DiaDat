@@ -8,6 +8,7 @@
 #include "diadat_channel_u8.h"
 #include "diadat_channel_s16.h"
 #include "diadat_channel_u16.h"
+#include "diadat_channel_s32.h"
 #include "diadat_channel_r64.h"
 
 #include "my_debug.h"
@@ -34,6 +35,7 @@ c_DiaDat_ChannelTypeBase DiaDat_ChannelType_u8("DiaDat_ChannelType_u8", "u8", e_
 c_DiaDat_ChannelTypeBase DiaDat_ChannelType_s8("DiaDat_ChannelType_s8", "s8", e_DiaDat_ChannelType_s8, "INT8");
 c_DiaDat_ChannelTypeBase DiaDat_ChannelType_u16("DiaDat_ChannelType_u16", "u16", e_DiaDat_ChannelType_u16, "WORD16");
 c_DiaDat_ChannelTypeBase DiaDat_ChannelType_s16("DiaDat_ChannelType_s16", "s16", e_DiaDat_ChannelType_s16, "INT16");
+c_DiaDat_ChannelTypeBase DiaDat_ChannelType_s32("DiaDat_ChannelType_s32", "s32", e_DiaDat_ChannelType_s32, "INT32");
 c_DiaDat_ChannelTypeBase DiaDat_ChannelType_d64("DiaDat_ChannelType_d64", "r64", e_DiaDat_ChannelType_d64, "REAL64");
 
 t_DiaDat_ChannelType c_DiaDat_ChannelTypeBase::convert2type(const char *typeName)
@@ -83,6 +85,11 @@ static DiaDat_ChannelDataBase *createChannelBase(t_DiaDat_ChannelType type, void
         case e_DiaDat_ChannelType_u16:
         {
             data = new DiaDat_ChannelDataU16(var);
+            break;
+        }
+        case e_DiaDat_ChannelType_s32:
+        {
+            data = new DiaDat_ChannelDataS32(var);
             break;
         }
         case e_DiaDat_ChannelType_d64:
