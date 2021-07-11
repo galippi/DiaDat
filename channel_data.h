@@ -15,7 +15,7 @@ class ChannelData
 public:
     std::string chName;
     std::string unit;
-    std::string storeType;
+    t_DiaDatFileStoreType storeType;
     std::string filename;
     std::string dataType;
     std::string recordCount;
@@ -24,11 +24,11 @@ public:
     std::string resolution;
     std::string min;
     std::string max;
-    void init()
+    void clear()
     {
         chName.clear();
         unit.clear();
-        storeType.clear();
+        storeType = e_DiaDatFileStoreType_Undef;
         filename.clear();
         dataType.clear();
         recordCount.clear();
@@ -41,16 +41,16 @@ public:
     bool isOk()
     {
         if (isEmpty())
-            return true;
+            return false;
         if (chName.empty())
             return false;
-        if (unit.empty())
-            return false;
-        if (storeType.empty())
+        //if (unit.empty())
+        //    return false;
+        if (storeType == e_DiaDatFileStoreType_Undef)
             return false;
         if (filename.empty())
         {
-            if (storeType != "IMPLICIT")
+            if (storeType != e_DiaDatFileStoreType_Implicit)
                 return false;
         }
         if (dataType.empty())
@@ -59,11 +59,14 @@ public:
             return false;
         if (channelIndex.empty())
         {
-            if (storeType != "IMPLICIT")
+            if (storeType != e_DiaDatFileStoreType_Implicit)
                 return false;
         }
         if (offset.empty())
-            return false;
+        {
+            if (storeType != e_DiaDatFileStoreType_Implicit)
+                return false;
+        }
         if (resolution.empty())
             return false;
         if (min.empty())
@@ -78,7 +81,7 @@ public:
             return false;
         if (!unit.empty())
             return false;
-        if (!storeType.empty())
+        if (storeType != e_DiaDatFileStoreType_Undef)
             return false;
         if (!filename.empty())
             return false;
