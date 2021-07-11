@@ -70,6 +70,48 @@ DiaDat_ChannelDataBase::~DiaDat_ChannelDataBase()
 {
 }
 
+void DiaDat_ChannelDataBase::setVar(uint8_t *var)
+{
+    (void)var;
+    throw dbg_spintf("DiaDat_Channel - not implemented setVar conversion (type=%d)!", getType());
+}
+
+void DiaDat_ChannelDataBase::setVar(int8_t *var)
+{
+    (void)var;
+    throw dbg_spintf("DiaDat_Channel - not implemented setVar conversion (type=%d)!", getType());
+}
+
+void DiaDat_ChannelDataBase::setVar(uint16_t *var)
+{
+    (void)var;
+    throw dbg_spintf("DiaDat_Channel - not implemented setVar conversion (type=%d)!", getType());
+}
+
+void DiaDat_ChannelDataBase::setVar(int16_t *var)
+{
+    (void)var;
+    throw dbg_spintf("DiaDat_Channel - not implemented setVar conversion (type=%d)!", getType());
+}
+
+void DiaDat_ChannelDataBase::setVar(uint32_t *var)
+{
+    (void)var;
+    throw dbg_spintf("DiaDat_Channel - not implemented setVar conversion (type=%d)!", getType());
+}
+
+void DiaDat_ChannelDataBase::setVar(int32_t *var)
+{
+    (void)var;
+    throw dbg_spintf("DiaDat_Channel - not implemented setVar conversion (type=%d)!", getType());
+}
+
+void DiaDat_ChannelDataBase::setVar(float *var)
+{
+    (void)var;
+    throw dbg_spintf("DiaDat_Channel - not implemented setVar conversion (type=%d)!", getType());
+}
+
 static DiaDat_ChannelDataBase *createChannelBase(t_DiaDat_ChannelType type, void *var)
 {
     DiaDat_ChannelDataBase *data;

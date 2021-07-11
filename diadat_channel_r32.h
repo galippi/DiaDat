@@ -39,6 +39,16 @@ public:
     {
         return e_DiaDat_ChannelType_f32;
     }
+    virtual void setVar(float *var)
+    {
+        if (var == NULL)
+        {
+            dataPtr = &rawValue;
+        }else
+        {
+            dataPtr = var;
+        }
+    }
     double getMin() const
     {
         return min * factor + offset;

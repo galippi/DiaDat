@@ -37,9 +37,26 @@ class DiaDat_File
     ~DiaDat_File();
     int8_t open(const char *filename);
     int8_t create(const char *filename);
-    DiaDat_Channel *createChannel(const char *name, t_DiaDat_ChannelType type, void *var = NULL);
+    DiaDat_Channel *createChannel(const char *name, t_DiaDat_ChannelType type);
+    DiaDat_Channel *createChannel(const char *name, t_DiaDat_ChannelType type, uint8_t *var);
+    DiaDat_Channel *createChannel(const char *name, t_DiaDat_ChannelType type, int8_t *var);
+    DiaDat_Channel *createChannel(const char *name, t_DiaDat_ChannelType type, uint16_t *var);
+    DiaDat_Channel *createChannel(const char *name, t_DiaDat_ChannelType type, int16_t *var);
+    DiaDat_Channel *createChannel(const char *name, t_DiaDat_ChannelType type, uint32_t *var);
+    DiaDat_Channel *createChannel(const char *name, t_DiaDat_ChannelType type, int32_t *var);
+    DiaDat_Channel *createChannel(const char *name, t_DiaDat_ChannelType type, float *var);
+    DiaDat_Channel *createChannel(const char *name, t_DiaDat_ChannelType type, double *var);
     DiaDat_Channel *addChannel(ChannelData *chData);
-    void connectVar(const char *chName, void *var);
+
+    void connectVar(const char *chName, uint8_t *var);
+    void connectVar(const char *chName, int8_t *var);
+    void connectVar(const char *chName, uint16_t *var);
+    void connectVar(const char *chName, int16_t *var);
+    void connectVar(const char *chName, uint32_t *var);
+    void connectVar(const char *chName, int32_t *var);
+    void connectVar(const char *chName, double *var);
+    void connectVar(const char *chName, float *var);
+
     DiaDat_Channel *getChannel(const char *chName);
     //DiaDat_Channel *getChannel(int32_t chIdx);
     //DiaDat_DataFile *getDataFile(t_DiaDat_ChannelType type, const char *filename = NULL);

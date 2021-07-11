@@ -104,21 +104,8 @@ DiaDat_Channel *DiaDat_File::addChannel(ChannelData *chData)
     return ch;
 }
 
-DiaDat_Channel *DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelType chType, void *var)
+DiaDat_Channel *DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelType chType)
 {
-#if 0
-    if (type != e_DiaDatFileType_Write)
-        throw dbg_spintf("DiaDat_File::createChannel - channel cannot be created for this type of file (%d - %s)!", type, name);
-    auto it = channelNumber.find(name);
-    if (it != channelNumber.end())
-        throw dbg_spintf("Duplicated channel name %s!", name);
-    auto fileChannel = getDataFile(chType);
-    DiaDat_FileChannel *ch = new DiaDat_FileChannel(name, chType, fileChannel, var);
-    int32_t chIdx = channels.size();
-    channels.push_back(ch);
-    channelNumber[name] = chIdx;
-    return chIdx;
-#endif
     if (type != e_DiaDatFileType_Write)
         throw dbg_spintf("DiaDat_File::createChannel - channel cannot be created for this type of file (%d - %s)!", type, name);
     auto it = channels.find(name);
@@ -129,15 +116,112 @@ DiaDat_Channel *DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelTyp
     }
     DiaDat_Channel * ch = DiaDat_Channel::createChannel(this, name, chType);
     channels[name] = ch;
-    if (var != NULL)
-        ch->connectVar(var);
     return ch;
 }
 
-void DiaDat_File::connectVar(const char *chName, void *var)
+DiaDat_Channel *DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelType chType, uint8_t *var)
+{
+    DiaDat_Channel * ch = createChannel(name, chType);
+    ch->connectVar(var);
+    return ch;
+}
+
+DiaDat_Channel *DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelType chType, int8_t *var)
+{
+    DiaDat_Channel * ch = createChannel(name, chType);
+    ch->connectVar(var);
+    return ch;
+}
+
+DiaDat_Channel *DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelType chType, uint16_t *var)
+{
+    DiaDat_Channel * ch = createChannel(name, chType);
+    ch->connectVar(var);
+    return ch;
+}
+
+DiaDat_Channel *DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelType chType, int16_t *var)
+{
+    DiaDat_Channel * ch = createChannel(name, chType);
+    ch->connectVar(var);
+    return ch;
+}
+
+DiaDat_Channel *DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelType chType, uint32_t *var)
+{
+    DiaDat_Channel * ch = createChannel(name, chType);
+    ch->connectVar(var);
+    return ch;
+}
+
+DiaDat_Channel *DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelType chType, int32_t *var)
+{
+    DiaDat_Channel * ch = createChannel(name, chType);
+    ch->connectVar(var);
+    return ch;
+}
+
+DiaDat_Channel *DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelType chType, float *var)
+{
+    DiaDat_Channel * ch = createChannel(name, chType);
+    ch->connectVar(var);
+    return ch;
+}
+
+DiaDat_Channel *DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelType chType, double *var)
+{
+    DiaDat_Channel * ch = createChannel(name, chType);
+    ch->connectVar(var);
+    return ch;
+}
+
+
+void DiaDat_File::connectVar(const char *chName, uint8_t *var)
 {
     DiaDat_Channel *ch = getChannel(chName);
-    ch->getDataHandler()->set(var);
+    ch->connectVar(var);
+}
+
+void DiaDat_File::connectVar(const char *chName, int8_t *var)
+{
+    DiaDat_Channel *ch = getChannel(chName);
+    ch->connectVar(var);
+}
+
+void DiaDat_File::connectVar(const char *chName, uint16_t *var)
+{
+    DiaDat_Channel *ch = getChannel(chName);
+    ch->connectVar(var);
+}
+
+void DiaDat_File::connectVar(const char *chName, int16_t *var)
+{
+    DiaDat_Channel *ch = getChannel(chName);
+    ch->connectVar(var);
+}
+
+void DiaDat_File::connectVar(const char *chName, uint32_t *var)
+{
+    DiaDat_Channel *ch = getChannel(chName);
+    ch->connectVar(var);
+}
+
+void DiaDat_File::connectVar(const char *chName, int32_t *var)
+{
+    DiaDat_Channel *ch = getChannel(chName);
+    ch->connectVar(var);
+}
+
+void DiaDat_File::connectVar(const char *chName, float *var)
+{
+    DiaDat_Channel *ch = getChannel(chName);
+    ch->connectVar(var);
+}
+
+void DiaDat_File::connectVar(const char *chName, double *var)
+{
+    DiaDat_Channel *ch = getChannel(chName);
+    ch->connectVar(var);
 }
 
 DiaDat_Channel *DiaDat_File::getChannel(const char *chName)

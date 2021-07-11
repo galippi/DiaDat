@@ -84,16 +84,23 @@ class DiaDat_ChannelDataBase
         return dataPtr;
     }
     virtual int8_t set(double data) = 0;
-    virtual void set(double *data)
+    virtual void setVar(double *data)
     {
         conversionIsRequired = true;
         dataPtr = data;
     }
-    virtual void set(void *data)
-    {
-        conversionIsRequired = false;
-        dataPtr = data;
-    }
+    //virtual void set(void *data)
+    //{
+    //    conversionIsRequired = false;
+    //    dataPtr = data;
+    //}
+    virtual void setVar(uint8_t *var);
+    virtual void setVar(int8_t *var);
+    virtual void setVar(uint16_t *var);
+    virtual void setVar(int16_t *var);
+    virtual void setVar(uint32_t *var);
+    virtual void setVar(int32_t *var);
+    virtual void setVar(float *var);
     uint8_t getDataSize() const
     {
         return dataSize;
@@ -150,10 +157,42 @@ class DiaDat_Channel
     const std::string getFileName();
     const std::string getDiaDatFileType();
     unsigned getFileOffset();
-    void connectVar(void *var)
+    void connectVar(uint8_t *var)
     {
-        getDataHandler()->set(var);
+        getDataHandler()->setVar(var);
     }
+    void connectVar(int8_t *var)
+    {
+        getDataHandler()->setVar(var);
+    }
+    void connectVar(uint16_t *var)
+    {
+        getDataHandler()->setVar(var);
+    }
+    void connectVar(int16_t *var)
+    {
+        getDataHandler()->setVar(var);
+    }
+    void connectVar(uint32_t *var)
+    {
+        getDataHandler()->setVar(var);
+    }
+    void connectVar(int32_t *var)
+    {
+        getDataHandler()->setVar(var);
+    }
+    void connectVar(float *var)
+    {
+        getDataHandler()->setVar(var);
+    }
+    void connectVar(double *var)
+    {
+        getDataHandler()->setVar(var);
+    }
+    //void connectVar(void *var)
+    //{
+    //    getDataHandler()->set(var);
+    //}
   protected:
     std::string name;
     std::string unit;
