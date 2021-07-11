@@ -31,13 +31,11 @@ const std::string DiaDat_FileChannel::getDiaDatFileType() const
 DiaDat_FileChannelImplicit::DiaDat_FileChannelImplicit(DiaDat_File *_parent, ChannelData *chData) :
         DiaDat_FileChannel(_parent, chData)
 {
-
 }
 
 DiaDat_FileChannelExplicit::DiaDat_FileChannelExplicit(DiaDat_File *_parent, ChannelData *chData) :
         DiaDat_FileChannel(_parent, chData)
 {
-
 }
 
 const char *DiaDat_FileChannelExplicit::getFileName() const
@@ -128,14 +126,22 @@ uint8_t *DiaDat_DataFileImplicit::getBuffer()
 }
 
 int8_t DiaDat_DataFileImplicit::writeRecord()
-{ // nothing to do
+{
+    for (auto it = channels.begin(); it < channels.end(); it++)
+    {
+        DiaDat_Channel *ch = (*it);
+        ch->write();
+    }
     return 0;
 }
 
 int8_t DiaDat_DataFileImplicit::readRecord()
 {
     for (auto it = channels.begin(); it < channels.end(); it++)
-        (*it)->read();
+    {
+        DiaDat_Channel *ch = (*it);
+        ch->read();
+    }
     return 0;
 }
 
@@ -203,7 +209,8 @@ int8_t DiaDat_DataFileExplicit::writeRecord()
     }
     for (auto it = channels.begin() ; it != channels.end(); ++it)
     {
-        (*it)->write(block);
+        DiaDat_Channel *ch = (*it);
+        ch->write(block);
     }
     if (fwrite(block, 1, blockSize, file) != blockSize)
     {
@@ -224,6 +231,9 @@ int8_t DiaDat_DataFileExplicit::readRecord()
     if (fread(block, 1, blockSize, file) != blockSize)
         throw dbg_spintf("DiaDat_DataFileExplicit::readRecord - error loading block!");
     for (auto it = channels.begin(); it < channels.end(); it++)
-        (*it)->read(block);
+    {
+        DiaDat_Channel *ch = (*it);
+        ch->read(block);
+    }
     return 0;
 }

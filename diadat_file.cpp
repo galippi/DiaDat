@@ -504,13 +504,19 @@ int8_t DiaDat_File::writeHeaderLine(const char *pszFormat, ...)
 int8_t DiaDat_File::readRecord()
 {
     for (auto it = dataFiles.begin() ; it != dataFiles.end(); ++it)
-        it->second->readRecord();
+    {
+        DiaDat_DataFile *file = it->second;
+        file->readRecord();
+    }
     return 0;
 }
 
 int8_t DiaDat_File::writeRecord()
 {
     for (auto it = dataFiles.begin() ; it != dataFiles.end(); ++it)
-        it->second->writeRecord();
+    {
+        DiaDat_DataFile *file = it->second;
+        file->writeRecord();
+    }
     return 0;
 }
