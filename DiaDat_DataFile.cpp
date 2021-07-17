@@ -5,6 +5,8 @@
  *      Author: liptakok
  */
 
+#include <stdlib.h>
+
 #include <string>
 
 #include "my_debug.h"
