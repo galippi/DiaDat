@@ -249,7 +249,7 @@ DiaDat_Channel *DiaDat_File::getChannel(const char *chName)
 {
     auto it = channels.find(chName);
     if (it == channels.end())
-        throw dbg_spintf("Error: unable to connect variable to channel name %s!", name);
+        throw dbg_spintf("Error: unable to connect variable to channel name %s!", name.c_str());
      return it->second;
 }
 
