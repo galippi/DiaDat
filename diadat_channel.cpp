@@ -166,6 +166,8 @@ static DiaDat_ChannelDataBase *createChannelBase(ChannelData *chData)
     if ((chType == e_DiaDat_ChannelType_u8) && (chData->offset < 0))
         chType = e_DiaDat_ChannelType_s8;
     DiaDat_ChannelDataBase *dataHandler = createChannelBase(chType, NULL);
+    dataHandler->setOffset(chData->offset);
+    dataHandler->setFactor(chData->resolution);
     return dataHandler;
 }
 
