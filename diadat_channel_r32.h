@@ -17,6 +17,7 @@ class DiaDat_ChannelDataR32 : public DiaDat_ChannelDataBase
 public:
     DiaDat_ChannelDataR32(void *var = NULL) : DiaDat_ChannelDataBase(NULL, var)
     {
+        channelTypeBase = &DiaDat_ChannelType_r32;
         dataSize = 4;
         rawValue = 0.0;
         min = 0;
@@ -27,10 +28,6 @@ public:
             dataPtr = &rawValue;
         else
             dataPtr = var;
-    }
-    const char *getFileExtension()
-    {
-        return "r32";
     }
     ~DiaDat_ChannelDataR32()
     {

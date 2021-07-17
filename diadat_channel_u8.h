@@ -15,6 +15,7 @@ class DiaDat_ChannelDataU8 : public DiaDat_ChannelDataBase
 public:
     DiaDat_ChannelDataU8(void *var = NULL) : DiaDat_ChannelDataBase(NULL, var)
     {
+        channelTypeBase = &DiaDat_ChannelType_u8;
         dataSize = 1;
         rawValue = 0;
         min = 0;
@@ -25,10 +26,6 @@ public:
             dataPtr = &rawValue;
         else
             dataPtr = var;
-    }
-    const char *getFileExtension()
-    {
-        return "u8";
     }
     ~DiaDat_ChannelDataU8()
     {

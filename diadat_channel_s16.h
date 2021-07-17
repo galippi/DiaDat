@@ -15,6 +15,7 @@ class DiaDat_ChannelDataS16 : public DiaDat_ChannelDataBase
 public:
     DiaDat_ChannelDataS16(void *var = NULL) : DiaDat_ChannelDataBase(NULL, var)
     {
+        channelTypeBase = &DiaDat_ChannelType_s16;
         dataSize = 2;
         rawValue = 0;
         min = 0;
@@ -25,10 +26,6 @@ public:
             dataPtr = &rawValue;
         else
             dataPtr = var;
-    }
-    const char *getFileExtension()
-    {
-        return "s16";
     }
     ~DiaDat_ChannelDataS16()
     {

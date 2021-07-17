@@ -64,6 +64,10 @@ extern c_DiaDat_ChannelTypeBase DiaDat_ChannelType_u8;
 extern c_DiaDat_ChannelTypeBase DiaDat_ChannelType_s8;
 extern c_DiaDat_ChannelTypeBase DiaDat_ChannelType_u16;
 extern c_DiaDat_ChannelTypeBase DiaDat_ChannelType_s16;
+extern c_DiaDat_ChannelTypeBase DiaDat_ChannelType_u32;
+extern c_DiaDat_ChannelTypeBase DiaDat_ChannelType_s32;
+extern c_DiaDat_ChannelTypeBase DiaDat_ChannelType_r32;
+extern c_DiaDat_ChannelTypeBase DiaDat_ChannelType_r64;
 
 class DiaDat_ChannelDataBase
 {
@@ -73,7 +77,17 @@ class DiaDat_ChannelDataBase
     virtual t_DiaDat_ChannelType getType() const = 0;
     virtual double getMin() const = 0;
     virtual double getMax() const = 0;
+    double factor;
+    void setFactor(double _factor)
+    {
+        factor = _factor;
+    }
     virtual double getFactor() const = 0;
+    double offset;
+    void setOffset(double _offset)
+    {
+        offset = _offset;
+    }
     virtual double getOffset() const
     {
         return 0.000000;
@@ -108,12 +122,16 @@ class DiaDat_ChannelDataBase
     virtual int8_t read(const uint8_t *buffer) = 0;
     virtual int8_t write() = 0;
     virtual int8_t write(uint8_t *buffer) = 0;
-    virtual const char *getFileExtension() = 0;
+    const char *getFileExtension()
+    {
+        return channelTypeBase->getDatFileSuffix();
+    }
   protected:
     uint8_t dataSize;
     void *dataPtr;
     bool conversionIsRequired;
     DiaDat_DataFile *parent;
+    c_DiaDat_ChannelTypeBase *channelTypeBase;
 };
 
 class ChannelData;
