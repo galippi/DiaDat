@@ -141,11 +141,21 @@ DiaDat_Channel *DiaDat_File::createImpliciteTimeChannel(const char *name, double
     return ch;
 }
 
+DiaDat_Channel *DiaDat_File::createChannel(const char *name, uint8_t *var)
+{
+    return createChannel(name, e_DiaDat_ChannelType_u8, var);
+}
+
 DiaDat_Channel *DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelType chType, uint8_t *var)
 {
     DiaDat_Channel * ch = createChannel(name, chType);
     ch->connectVar(var);
     return ch;
+}
+
+DiaDat_Channel *DiaDat_File::createChannel(const char *name, int8_t *var)
+{
+    return createChannel(name, e_DiaDat_ChannelType_s8, var);
 }
 
 DiaDat_Channel *DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelType chType, int8_t *var)
@@ -155,11 +165,21 @@ DiaDat_Channel *DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelTyp
     return ch;
 }
 
+DiaDat_Channel *DiaDat_File::createChannel(const char *name, uint16_t *var)
+{
+    return createChannel(name, e_DiaDat_ChannelType_u16, var);
+}
+
 DiaDat_Channel *DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelType chType, uint16_t *var)
 {
     DiaDat_Channel * ch = createChannel(name, chType);
     ch->connectVar(var);
     return ch;
+}
+
+DiaDat_Channel *DiaDat_File::createChannel(const char *name, int16_t *var)
+{
+    return createChannel(name, e_DiaDat_ChannelType_s16, var);
 }
 
 DiaDat_Channel *DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelType chType, int16_t *var)
@@ -169,11 +189,21 @@ DiaDat_Channel *DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelTyp
     return ch;
 }
 
+DiaDat_Channel *DiaDat_File::createChannel(const char *name, uint32_t *var)
+{
+    return createChannel(name, e_DiaDat_ChannelType_u32, var);
+}
+
 DiaDat_Channel *DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelType chType, uint32_t *var)
 {
     DiaDat_Channel * ch = createChannel(name, chType);
     ch->connectVar(var);
     return ch;
+}
+
+DiaDat_Channel *DiaDat_File::createChannel(const char *name, int32_t *var)
+{
+    return createChannel(name, e_DiaDat_ChannelType_s32, var);
 }
 
 DiaDat_Channel *DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelType chType, int32_t *var)
@@ -183,11 +213,21 @@ DiaDat_Channel *DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelTyp
     return ch;
 }
 
+DiaDat_Channel *DiaDat_File::createChannel(const char *name, float *var)
+{
+    return createChannel(name, e_DiaDat_ChannelType_r32, var);
+}
+
 DiaDat_Channel *DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelType chType, float *var)
 {
     DiaDat_Channel * ch = createChannel(name, chType);
     ch->connectVar(var);
     return ch;
+}
+
+DiaDat_Channel *DiaDat_File::createChannel(const char *name, double *var)
+{
+    return createChannel(name, e_DiaDat_ChannelType_r64, var);
 }
 
 DiaDat_Channel *DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelType chType, double *var)

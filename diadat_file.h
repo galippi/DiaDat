@@ -38,13 +38,21 @@ class DiaDat_File
     int8_t open(const char *filename);
     int8_t create(const char *filename);
     DiaDat_Channel *createChannel(const char *name, t_DiaDat_ChannelType type);
+    DiaDat_Channel *createChannel(const char *name, uint8_t *var);
     DiaDat_Channel *createChannel(const char *name, t_DiaDat_ChannelType type, uint8_t *var);
+    DiaDat_Channel *createChannel(const char *name, int8_t *var);
     DiaDat_Channel *createChannel(const char *name, t_DiaDat_ChannelType type, int8_t *var);
+    DiaDat_Channel *createChannel(const char *name, uint16_t *var);
     DiaDat_Channel *createChannel(const char *name, t_DiaDat_ChannelType type, uint16_t *var);
+    DiaDat_Channel *createChannel(const char *name, int16_t *var);
     DiaDat_Channel *createChannel(const char *name, t_DiaDat_ChannelType type, int16_t *var);
+    DiaDat_Channel *createChannel(const char *name, uint32_t *var);
     DiaDat_Channel *createChannel(const char *name, t_DiaDat_ChannelType type, uint32_t *var);
+    DiaDat_Channel *createChannel(const char *name, int32_t *var);
     DiaDat_Channel *createChannel(const char *name, t_DiaDat_ChannelType type, int32_t *var);
+    DiaDat_Channel *createChannel(const char *name, float *var);
     DiaDat_Channel *createChannel(const char *name, t_DiaDat_ChannelType type, float *var);
+    DiaDat_Channel *createChannel(const char *name, double *var);
     DiaDat_Channel *createChannel(const char *name, t_DiaDat_ChannelType type, double *var);
     DiaDat_Channel *addChannel(ChannelData *chData);
 
