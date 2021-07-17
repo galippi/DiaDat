@@ -111,10 +111,33 @@ DiaDat_Channel *DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelTyp
     if (it != channels.end())
     {
         throw dbg_spintf("Duplicated channel name %s!", name);
-        exit(1);
     }
     DiaDat_Channel * ch = DiaDat_Channel::createChannel(this, name, chType);
     channels[name] = ch;
+    return ch;
+}
+
+DiaDat_Channel *DiaDat_File::createImpliciteTimeChannel(const char *name, double dT)
+{
+    (void)name;
+    (void)dT;
+    if (type != e_DiaDatFileType_Write)
+        throw dbg_spintf("DiaDat_File::createImpliciteTimeChannel - channel cannot be created for this type of file (%s)!", name);
+    auto it = channels.find(name);
+    if (it != channels.end())
+    {
+        throw dbg_spintf("DiaDat_File::createImpliciteTimeChannel - duplicated channel name %s!", name);
+    }
+    DiaDat_Channel * ch = NULL;
+#if 0
+    ChannelData chData;
+    chData.chName = name;
+    chData.unit = "s";
+    chData.storeType = e_DiaDatFileStoreType_Implicit;
+    chData.resolution = dT;
+    ch = new DiaDat_Channel(&chData);
+    channels[name] = ch;
+#endif
     return ch;
 }
 
@@ -172,14 +195,6 @@ DiaDat_Channel *DiaDat_File::createChannel(const char *name, t_DiaDat_ChannelTyp
     DiaDat_Channel * ch = createChannel(name, chType);
     ch->connectVar(var);
     return ch;
-}
-
-DiaDat_Channel *DiaDat_File::createImpliciteTimeChannel(const char *name, double dT)
-{
-    (void)name;
-    (void)dT;
-    /* not yet implemented*/
-    return NULL;
 }
 
 void DiaDat_File::connectVar(const char *chName, uint8_t *var)
@@ -477,7 +492,8 @@ int8_t DiaDat_File::readHeader()
                             channelData.offset = headerInfo.value;
                             break;
                         case 241:
-                            channelData.resolution = headerInfo.value;
+                            if (sscanf(headerInfo.value, "%lf,", &channelData.resolution) != 1)
+                                throw dbg_spintf("DiaDat_File::readHeader - invalid channel header store format (%s - line=%s type=%d val=%s)!", name.c_str(), line, headerInfo.headerType, headerInfo.value);
                             break;
                         case 250:
                             channelData.min = headerInfo.value;
