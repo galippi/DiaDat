@@ -29,11 +29,10 @@ typedef enum
 class c_DiaDat_ChannelTypeBase
 {
 public:
-    c_DiaDat_ChannelTypeBase(const char *name, const char *datFileSuffix, t_DiaDat_ChannelType _type, const char *_datChannelType)
+    c_DiaDat_ChannelTypeBase(const char *datFileSuffix, t_DiaDat_ChannelType _type, const char *_datChannelType)
     {
         id = idSource;
         idSource++;
-        this->name = name;
         this->datFileSuffix = datFileSuffix;
         datChannelType = _datChannelType;
         type = _type;
@@ -44,10 +43,6 @@ public:
     {
         return id;
     }
-    const char *getName() const
-    {
-        return name;
-    }
     const char *getDatFileSuffix() const
     {
         return datFileSuffix;
@@ -57,7 +52,6 @@ public:
 protected:
     static uint8_t idSource;
     uint8_t id;
-    const char *name;
     const char *datFileSuffix;
     t_DiaDat_ChannelType type;
     std::string datChannelType;

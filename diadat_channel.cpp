@@ -33,14 +33,14 @@ uint8_t c_DiaDat_ChannelTypeBase::idSource = 0;
 std::map<t_DiaDat_ChannelType, std::string> c_DiaDat_ChannelTypeBase::type2datChannelType;
 std::map<std::string, t_DiaDat_ChannelType> c_DiaDat_ChannelTypeBase::datChannelType2type;
 
-c_DiaDat_ChannelTypeBase DiaDat_ChannelType_u8("DiaDat_ChannelType_u8", "u8", e_DiaDat_ChannelType_u8, "WORD8");
-c_DiaDat_ChannelTypeBase DiaDat_ChannelType_s8("DiaDat_ChannelType_s8", "u8", e_DiaDat_ChannelType_s8, "WORD8");
-c_DiaDat_ChannelTypeBase DiaDat_ChannelType_u16("DiaDat_ChannelType_u16", "u16", e_DiaDat_ChannelType_u16, "WORD16");
-c_DiaDat_ChannelTypeBase DiaDat_ChannelType_s16("DiaDat_ChannelType_s16", "s16", e_DiaDat_ChannelType_s16, "INT16");
-c_DiaDat_ChannelTypeBase DiaDat_ChannelType_u32("DiaDat_ChannelType_u32", "u32", e_DiaDat_ChannelType_u32, "WORD32");
-c_DiaDat_ChannelTypeBase DiaDat_ChannelType_s32("DiaDat_ChannelType_s32", "s32", e_DiaDat_ChannelType_s32, "INT32");
-c_DiaDat_ChannelTypeBase DiaDat_ChannelType_f32("DiaDat_ChannelType_f32", "r32", e_DiaDat_ChannelType_f32, "REAL32");
-c_DiaDat_ChannelTypeBase DiaDat_ChannelType_d64("DiaDat_ChannelType_d64", "r64", e_DiaDat_ChannelType_d64, "REAL64");
+c_DiaDat_ChannelTypeBase DiaDat_ChannelType_u8("u8", e_DiaDat_ChannelType_u8, "WORD8");
+c_DiaDat_ChannelTypeBase DiaDat_ChannelType_s8("u8", e_DiaDat_ChannelType_s8, "WORD8");
+c_DiaDat_ChannelTypeBase DiaDat_ChannelType_u16("u16", e_DiaDat_ChannelType_u16, "WORD16");
+c_DiaDat_ChannelTypeBase DiaDat_ChannelType_s16("s16", e_DiaDat_ChannelType_s16, "INT16");
+c_DiaDat_ChannelTypeBase DiaDat_ChannelType_u32("u32", e_DiaDat_ChannelType_u32, "WORD32");
+c_DiaDat_ChannelTypeBase DiaDat_ChannelType_s32("s32", e_DiaDat_ChannelType_s32, "INT32");
+c_DiaDat_ChannelTypeBase DiaDat_ChannelType_f32("r32", e_DiaDat_ChannelType_f32, "REAL32");
+c_DiaDat_ChannelTypeBase DiaDat_ChannelType_d64("r64", e_DiaDat_ChannelType_d64, "REAL64");
 
 t_DiaDat_ChannelType c_DiaDat_ChannelTypeBase::convert2type(const char *typeName)
 {
