@@ -39,8 +39,8 @@ c_DiaDat_ChannelTypeBase DiaDat_ChannelType_u16("u16", e_DiaDat_ChannelType_u16,
 c_DiaDat_ChannelTypeBase DiaDat_ChannelType_s16("s16", e_DiaDat_ChannelType_s16, "INT16");
 c_DiaDat_ChannelTypeBase DiaDat_ChannelType_u32("u32", e_DiaDat_ChannelType_u32, "WORD32");
 c_DiaDat_ChannelTypeBase DiaDat_ChannelType_s32("s32", e_DiaDat_ChannelType_s32, "INT32");
-c_DiaDat_ChannelTypeBase DiaDat_ChannelType_r32("r32", e_DiaDat_ChannelType_f32, "REAL32");
-c_DiaDat_ChannelTypeBase DiaDat_ChannelType_r64("r64", e_DiaDat_ChannelType_d64, "REAL64");
+c_DiaDat_ChannelTypeBase DiaDat_ChannelType_r32("r32", e_DiaDat_ChannelType_r32, "REAL32");
+c_DiaDat_ChannelTypeBase DiaDat_ChannelType_r64("r64", e_DiaDat_ChannelType_r64, "REAL64");
 
 t_DiaDat_ChannelType c_DiaDat_ChannelTypeBase::convert2type(const char *typeName)
 {
@@ -143,12 +143,12 @@ static DiaDat_ChannelDataBase *createChannelBase(t_DiaDat_ChannelType type, void
             data = new DiaDat_ChannelDataU32(var);
             break;
         }
-        case e_DiaDat_ChannelType_f32:
+        case e_DiaDat_ChannelType_r32:
         {
             data = new DiaDat_ChannelDataR32(var);
             break;
         }
-        case e_DiaDat_ChannelType_d64:
+        case e_DiaDat_ChannelType_r64:
         {
             data = new DiaDat_ChannelDataR64(var);
             break;

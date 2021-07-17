@@ -22,8 +22,8 @@ typedef enum
   e_DiaDat_ChannelType_s16,
   e_DiaDat_ChannelType_u32,
   e_DiaDat_ChannelType_s32,
-  e_DiaDat_ChannelType_f32,
-  e_DiaDat_ChannelType_d64,
+  e_DiaDat_ChannelType_r32,
+  e_DiaDat_ChannelType_r64,
 }t_DiaDat_ChannelType;
 
 class c_DiaDat_ChannelTypeBase
