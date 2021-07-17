@@ -30,10 +30,6 @@ public:
     ~DiaDat_ChannelDataU32()
     {
     }
-    t_DiaDat_ChannelType getType() const
-    {
-        return e_DiaDat_ChannelType_u32;
-    }
     virtual void setVar(uint32_t *var)
     {
         if (var == NULL)

@@ -32,10 +32,6 @@ public:
     ~DiaDat_ChannelDataR64()
     {
     }
-    t_DiaDat_ChannelType getType() const
-    {
-        return e_DiaDat_ChannelType_d64;
-    }
     virtual void setVar(double *var)
     {
         if (var == NULL)

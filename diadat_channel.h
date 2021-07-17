@@ -48,6 +48,10 @@ public:
     {
         return datFileSuffix;
     }
+    t_DiaDat_ChannelType getType() const
+    {
+        return type;
+    }
     static t_DiaDat_ChannelType convert2type(const char *typeName);
     static const std::string &getChannelType(t_DiaDat_ChannelType type);
 protected:
@@ -74,7 +78,10 @@ class DiaDat_ChannelDataBase
   public:
     DiaDat_ChannelDataBase(DiaDat_DataFile *_parent, void *var = NULL);
     virtual ~DiaDat_ChannelDataBase();
-    virtual t_DiaDat_ChannelType getType() const = 0;
+    t_DiaDat_ChannelType getType() const
+    {
+        return channelTypeBase->getType();
+    }
     virtual double getMin() const = 0;
     virtual double getMax() const = 0;
     double factor;

@@ -30,10 +30,6 @@ public:
     ~DiaDat_ChannelDataU8()
     {
     }
-    t_DiaDat_ChannelType getType() const
-    {
-        return e_DiaDat_ChannelType_u8;
-    }
     virtual void setVar(uint8_t *var)
     {
         if (var == NULL)
