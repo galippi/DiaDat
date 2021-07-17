@@ -79,6 +79,10 @@ class DiaDat_ChannelDataBase
     virtual double getMin() const = 0;
     virtual double getMax() const = 0;
     virtual double getFactor() const = 0;
+    virtual double getOffset() const
+    {
+        return 0.000000;
+    }
     virtual const void *getRaw() const
     {
         return dataPtr;

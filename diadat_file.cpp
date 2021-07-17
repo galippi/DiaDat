@@ -585,10 +585,10 @@ int8_t DiaDat_File::writeChannelHeader(DiaDat_Channel *ch)
     writeHeaderLine("214,%s", ch->getDiaDatFileType().c_str());
     writeHeaderLine("220,%u", recordCount); /* number of records */
     writeHeaderLine("221,%u", (ch->getFileOffset() / ch->getDataSize()) + 1);
-    writeHeaderLine("240,0.00000000");
-    writeHeaderLine("241,%lf", 0.00000000);
-    writeHeaderLine("250,0.00000000");
-    writeHeaderLine("251,0.00000000");
+    writeHeaderLine("240,%lf", ch->getDataHandler()->getOffset()); // value offset
+    writeHeaderLine("241,%lf", 1.00000000); // value factor
+    //writeHeaderLine("250,0.00000000"); // value minimum
+    //writeHeaderLine("251,0.00000000"); // value maximum
     writeHeaderLine("260,Numeric");
     writeHeaderLine("#ENDCHANNELHEADER");
     writeHeaderLine("");

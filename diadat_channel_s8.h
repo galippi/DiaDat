@@ -28,7 +28,7 @@ public:
     }
     const char *getFileExtension()
     {
-        return "s8";
+        return "u8";
     }
     ~DiaDat_ChannelDataS8()
     {
@@ -75,10 +75,9 @@ public:
     }
     virtual int8_t read(const uint8_t *block)
     {
+        rawValue = (int8_t)(block[0] - 128);
         if (dataPtr != NULL)
-            *(int8_t*)dataPtr = (int8_t)block[0];
-        else
-            rawValue = (int8_t)block[0];
+            *(int8_t*)dataPtr = rawValue ;
         return 0;
     }
 
@@ -93,10 +92,15 @@ public:
     virtual int8_t write(uint8_t *block)
     {
         if (dataPtr != NULL)
-            block[0] = (uint8_t)*(int8_t*)dataPtr;
+            block[0] = ((uint8_t)(*(int8_t*)dataPtr) + 128);
         else
-            block[0] = (uint8_t)rawValue;
+            block[0] = (uint8_t)(rawValue + 128);
         return 0;
+    }
+
+    virtual double getOffset() const
+    {
+        return -128.0000;
     }
 
 protected:
