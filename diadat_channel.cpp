@@ -163,6 +163,8 @@ static DiaDat_ChannelDataBase *createChannelBase(t_DiaDat_ChannelType type, void
 static DiaDat_ChannelDataBase *createChannelBase(ChannelData *chData)
 {
     t_DiaDat_ChannelType chType = c_DiaDat_ChannelTypeBase::convert2type(chData->dataType.c_str());
+    if ((chType == e_DiaDat_ChannelType_u8) && (chData->offset < 0))
+        chType = e_DiaDat_ChannelType_s8;
     DiaDat_ChannelDataBase *dataHandler = createChannelBase(chType, NULL);
     return dataHandler;
 }
@@ -204,10 +206,16 @@ DiaDat_Channel::DiaDat_Channel(DiaDat_File *_parent, ChannelData *chData)
     name = chData->chName;
     dataHandler = createChannelBase(chData);
     std::string dataFileName;
-    if (chData->storeType == e_DiaDatFileStoreType_Explicit)
-        dataFileName = _parent->getName() + "." + dataHandler->getFileExtension();
-    else
-        dataFileName = "IMPLICIT:";
+    if (chData->filename.empty())
+    {
+        if (chData->storeType == e_DiaDatFileStoreType_Explicit)
+            dataFileName = _parent->getName() + "." + dataHandler->getFileExtension();
+        else
+            dataFileName = "IMPLICIT:";
+    }else
+    {
+        dataFileName = chData->filename;
+    }
     if (chData->storeType == e_DiaDatFileStoreType_Explicit)
     {
         offset = (std::stoi(chData->channelIndex, nullptr, 10) - 1) * dataHandler->getDataSize();

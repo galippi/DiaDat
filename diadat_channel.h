@@ -37,7 +37,8 @@ public:
         datChannelType = _datChannelType;
         type = _type;
         type2datChannelType[type] = datChannelType;
-        datChannelType2type[datChannelType] = type;
+        if (type != e_DiaDat_ChannelType_s8) // S8 channel is not a native channel - it would not be added
+            datChannelType2type[datChannelType] = type;
     }
     uint8_t getId() const
     {
