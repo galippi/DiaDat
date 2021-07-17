@@ -489,11 +489,12 @@ int8_t DiaDat_File::readHeader()
                             channelData.channelIndex = headerInfo.value;
                             break;
                         case 240:
-                            channelData.offset = headerInfo.value;
+                            if (sscanf(headerInfo.value, "%lf,", &channelData.offset) != 1)
+                                throw dbg_spintf("DiaDat_File::readHeader - invalid channel header offset format (%s - line=%s type=%d val=%s)!", name.c_str(), line, headerInfo.headerType, headerInfo.value);
                             break;
                         case 241:
-                            if (sscanf(headerInfo.value, "%lf,", &channelData.resolution) != 1)
-                                throw dbg_spintf("DiaDat_File::readHeader - invalid channel header store format (%s - line=%s type=%d val=%s)!", name.c_str(), line, headerInfo.headerType, headerInfo.value);
+                            if ((sscanf(headerInfo.value, "%lf,", &channelData.resolution) != 1) || (channelData.resolution < 1e-99))
+                                throw dbg_spintf("DiaDat_File::readHeader - invalid channel header resolution format (%s - line=%s type=%d val=%s)!", name.c_str(), line, headerInfo.headerType, headerInfo.value);
                             break;
                         case 250:
                             channelData.min = headerInfo.value;

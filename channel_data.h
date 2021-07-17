@@ -20,7 +20,7 @@ public:
     std::string dataType;
     std::string recordCount;
     std::string channelIndex;
-    std::string offset;
+    double offset;
     double resolution;
     std::string min;
     std::string max;
@@ -33,7 +33,7 @@ public:
         dataType.clear();
         recordCount.clear();
         channelIndex.clear();
-        offset.clear();
+        offset = -1e99;
         resolution = -1;
         min.clear();
         max.clear();
@@ -62,17 +62,19 @@ public:
             if (storeType != e_DiaDatFileStoreType_Implicit)
                 return false;
         }
-        if (offset.empty())
+        if (offset < -1e98)
         {
             if (storeType != e_DiaDatFileStoreType_Implicit)
                 return false;
         }
         if (resolution <= 0)
             return false;
+#if 0
         if (min.empty())
             return false;
         if (max.empty())
             return false;
+#endif
         return true;
     }
     bool isEmpty()
@@ -91,14 +93,16 @@ public:
             return false;
         if (!channelIndex.empty())
             return false;
-        if (!offset.empty())
+        if (offset > -1e98)
             return false;
         if (resolution >= 0)
             return false;
+#if 0
         if (!min.empty())
             return false;
         if (!max.empty())
             return false;
+#endif
         return true;
     }
 };
